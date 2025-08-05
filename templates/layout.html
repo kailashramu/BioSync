@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>{% block title %}BioSync - Where your car knows you{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/audi-logo.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    {% block styles %}{% endblock %}
+</head>
+<body class="audi-theme">
+    <nav class="navbar navbar-expand-lg audi-navbar mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <div class="audi-logo">
+                    <div class="audi-logo-inner">
+                        <!-- Pure CSS Audi logo rings -->
+                        <div class="audi-ring audi-ring-1"></div>
+                        <div class="audi-ring audi-ring-2"></div>
+                        <div class="audi-ring audi-ring-3"></div>
+                        <div class="audi-ring audi-ring-4"></div>
+                    </div>
+                </div>
+                <span class="ms-2">BioSync</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == url_for('index') %}active{% endif %}" href="{{ url_for('index') }}" id="home-nav-link">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == url_for('info.technology') %}active{% endif %}" href="{{ url_for('info.technology') }}">Technology</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link highlight-nav-item {% if request.path == url_for('biometrics.validate_biometrics') %}active{% endif %}" href="{{ url_for('biometrics.validate_biometrics') }}">Validate Biometrics</a>
+                    </li>
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == url_for('profile.dashboard') %}active{% endif %}" href="{{ url_for('profile.dashboard') }}">Dashboard</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle {% if '/biometrics/' in request.path and request.path != url_for('biometrics.validate_biometrics') %}active{% endif %}" href="#" id="biometricsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Manage Biometrics
+                        </a>
+                        <ul class="dropdown-menu audi-dropdown" aria-labelledby="biometricsDropdown">
+                            <li><a class="dropdown-item {% if request.path == url_for('biometrics.face_capture') %}active{% endif %}" href="{{ url_for('biometrics.face_capture') }}">Face Recognition</a></li>
+                            <li><a class="dropdown-item {% if request.path == url_for('biometrics.voice_capture') %}active{% endif %}" href="{{ url_for('biometrics.voice_capture') }}">Voice Recognition</a></li>
+                            <li><a class="dropdown-item {% if request.path == url_for('biometrics.retina_capture') %}active{% endif %}" href="{{ url_for('biometrics.retina_capture') }}">Retina Scan</a></li>
+                            <li><a class="dropdown-item {% if request.path == url_for('biometrics.proximity_setup') %}active{% endif %}" href="{{ url_for('biometrics.proximity_setup') }}">Digital Key</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == url_for('vehicle.list_vehicles') %}active{% endif %}" href="{{ url_for('vehicle.list_vehicles') }}">My Vehicles</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == url_for('vehicle.register_vehicle') %}active{% endif %}" href="{{ url_for('vehicle.register_vehicle') }}">Register Vehicle</a>
+                    </li>
+                    {% endif %}
+                </ul>
+                <ul class="navbar-nav">
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle {% if request.path == url_for('profile.edit_profile') %}active{% endif %}" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person-circle me-1"></i>
+                            {{ current_user.username }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end audi-dropdown" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item {% if request.path == url_for('profile.edit_profile') %}active{% endif %}" href="{{ url_for('profile.edit_profile') }}">Profile Settings</a></li>
+                            <li><a class="dropdown-item {% if request.path == url_for('auth.mfa_settings') %}active{% endif %}" href="{{ url_for('auth.mfa_settings') }}">MFA Settings</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">Sign Out</a></li>
+                        </ul>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == url_for('auth.login') %}active{% endif %}" href="{{ url_for('auth.login') }}">Sign In</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == url_for('auth.register') %}active{% endif %}" href="{{ url_for('auth.register') }}">Create Account</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container main-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} audi-alert alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        {% block content %}{% endblock %}
+    </div>
+
+    <footer class="footer mt-auto">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6 mb-3 mb-md-0">
+                    <div class="audi-logo audi-logo-footer mb-3">
+                        <div class="audi-logo-inner">
+                            <!-- Pure CSS Audi logo rings - larger version for footer -->
+                            <div class="audi-ring audi-ring-1"></div>
+                            <div class="audi-ring audi-ring-2"></div>
+                            <div class="audi-ring audi-ring-3"></div>
+                            <div class="audi-ring audi-ring-4"></div>
+                        </div>
+                    </div>
+                    <p class="mb-0">Audi - Vorsprung durch Technik</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="mb-1">BioSync &copy; {{ now.year }}</p>
+                    <p class="small mb-0">Where your car knows you</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/biometrics.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/biometric-animation.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/welcome-animation.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/micro-animations.js') }}"></script>
+    
+    <script>
+    // Process any flash messages that need to clear storage
+    document.addEventListener('DOMContentLoaded', function() {
+        // Look for special flash message categories
+        {% with messages = get_flashed_messages(category_filter=["clear_storage"]) %}
+            {% if messages %}
+                console.log('Received clear_storage flash message, clearing all biometric data from localStorage and sessionStorage');
+                
+                try {
+                    // Reset biometric animation system
+                    if (window.biometricAnimation) {
+                        // Reset session validations
+                        if (typeof window.biometricAnimation.resetSessionValidations === 'function') {
+                            window.biometricAnimation.resetSessionValidations();
+                            console.log('Session validations reset successfully');
+                        }
+                        
+                        // Reset overall validations
+                        if (typeof window.biometricAnimation.resetBiometricValidations === 'function') {
+                            window.biometricAnimation.resetBiometricValidations();
+                            console.log('All biometric validations reset successfully');
+                        }
+                    } 
+                    
+                    // Direct localStorage manipulation
+                    console.log('Clearing localStorage biometric data');
+                    
+                    // Reset validatedBiometrics
+                    let validatedBiometrics = JSON.parse(localStorage.getItem('validatedBiometrics') || '{"face":false,"voice":false,"retina":false,"proximity":false}');
+                    for (const key in validatedBiometrics) {
+                        validatedBiometrics[key] = false;
+                    }
+                    localStorage.setItem('validatedBiometrics', JSON.stringify(validatedBiometrics));
+                    
+                    // Reset validatedUserIds
+                    let validatedUserIds = JSON.parse(localStorage.getItem('validatedUserIds') || '{"face":null,"voice":null,"retina":null,"proximity":null}');
+                    for (const key in validatedUserIds) {
+                        validatedUserIds[key] = null;
+                    }
+                    localStorage.setItem('validatedUserIds', JSON.stringify(validatedUserIds));
+                    
+                    // Reset sessionValidations
+                    let sessionValidations = JSON.parse(localStorage.getItem('sessionValidations') || '{"face":false,"voice":false,"retina":false,"proximity":false}');
+                    for (const key in sessionValidations) {
+                        sessionValidations[key] = false;
+                    }
+                    localStorage.setItem('sessionValidations', JSON.stringify(sessionValidations));
+                    
+                    // Clear welcomeAnimationShown flag
+                    localStorage.removeItem('welcomeAnimationShown');
+                    
+                    // Clear validatedUserData
+                    localStorage.removeItem('validatedUserData');
+                    
+                    console.log('All biometric data cleared from localStorage and sessionStorage');
+                } catch (error) {
+                    console.error('Error clearing biometric storage:', error);
+                }
+            {% endif %}
+        {% endwith %}
+    });
+    
+    // Add Home link click handler to reset all biometric validations
+    document.addEventListener('DOMContentLoaded', function() {
+        const homeLink = document.getElementById('home-nav-link');
+        if (homeLink) {
+            homeLink.addEventListener('click', function(e) {
+                // Don't interrupt navigation, but clear validations first
+                
+                try {
+                    console.log('Home link clicked - resetting all biometric validations');
+                    
+                    // Reset both overall validations and session validations
+                    if (window.biometricAnimation) {
+                        // Reset session validations
+                        if (typeof window.biometricAnimation.resetSessionValidations === 'function') {
+                            window.biometricAnimation.resetSessionValidations();
+                            console.log('Session validations reset successfully');
+                        }
+                        
+                        // Also reset overall validations
+                        if (typeof window.biometricAnimation.resetBiometricValidations === 'function') {
+                            window.biometricAnimation.resetBiometricValidations();
+                            console.log('All biometric validations reset successfully');
+                        }
+                    } else {
+                        // Direct localStorage manipulation as fallback
+                        console.log('Using direct localStorage manipulation (fallback)');
+                        
+                        // Reset session validations
+                        let sessionData = JSON.parse(localStorage.getItem('sessionValidations')) || {};
+                        for (const key in sessionData) {
+                            sessionData[key] = false;
+                        }
+                        localStorage.setItem('sessionValidations', JSON.stringify(sessionData));
+                        
+                        // Reset overall validations
+                        let validatedData = JSON.parse(localStorage.getItem('validatedBiometrics')) || {};
+                        for (const key in validatedData) {
+                            validatedData[key] = false;
+                        }
+                        localStorage.setItem('validatedBiometrics', JSON.stringify(validatedData));
+                        
+                        console.log('All validations reset via localStorage');
+                    }
+                } catch (error) {
+                    console.error('Error resetting biometric validations:', error);
+                }
+                
+                // Continue navigation (don't prevent default)
+            });
+        }
+    });
+    </script>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>

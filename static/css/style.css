@@ -1,0 +1,573 @@
+/* Custom styles for Audi Biometric Application */
+
+:root {
+    --audi-red: #e63333;
+    --audi-gray: #53565a;
+    --audi-light-gray: #e6e6e6;
+    --audi-dark: #1c1c1c;
+    --audi-black: #000000;
+    --audi-white: #ffffff;
+    --audi-silver: #d1d1d1;
+    
+    /* New vehicle gallery variables */
+    --audi-gallery-border: #444;
+    --audi-gallery-hover: var(--audi-red);
+    --audi-active-thumb: rgba(230, 51, 51, 0.1);
+}
+
+/* Body styles */
+body.audi-theme {
+    font-family: 'Roboto', sans-serif;
+    padding-top: 0;
+    padding-bottom: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--audi-dark);
+    color: var(--audi-white);
+    letter-spacing: 0.02em;
+}
+
+/* Audi navbar */
+.audi-navbar {
+    background-color: var(--audi-black);
+    padding: 15px 0;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    border-bottom: 2px solid var(--audi-red);
+}
+
+.audi-navbar .navbar-brand {
+    font-weight: 300;
+    font-size: 1.5rem;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+}
+
+/* Custom navbar toggler styling */
+.audi-navbar .navbar-toggler {
+    border: 2px solid var(--audi-red);
+    padding: 0.5rem;
+    transition: all 0.2s;
+}
+
+.audi-navbar .navbar-toggler:hover,
+.audi-navbar .navbar-toggler:focus {
+    background-color: var(--audi-red);
+    outline: none;
+    box-shadow: none;
+}
+
+.audi-navbar .navbar-toggler-icon {
+    background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 32 32' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba(255,255,255,1)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 8h24M4 16h24M4 24h24'/%3E%3C/svg%3E");
+}
+
+.audi-logo-container {
+    display: inline-block;
+}
+
+.audi-rings {
+    height: 30px;
+    width: auto;
+    display: block;
+}
+
+.audi-navbar .nav-link {
+    font-weight: 500;
+    text-transform: uppercase;
+    font-size: 1rem;
+    letter-spacing: 0.05em;
+    padding: 0.5rem 1rem;
+    transition: all 0.2s;
+    color: var(--audi-white);
+    margin: 0 2px;
+}
+
+.audi-navbar .nav-link:hover {
+    color: var(--audi-white);
+    background-color: var(--audi-red);
+    border-radius: 3px;
+}
+
+.audi-navbar .nav-link.active {
+    color: var(--audi-white);
+    background-color: var(--audi-red);
+    border-radius: 3px;
+}
+
+/* Highlight for the Validate Biometrics nav item */
+.audi-navbar .highlight-nav-item {
+    color: var(--audi-red);
+    font-weight: bold;
+    border: 2px solid var(--audi-red);
+    border-radius: 5px;
+    padding: 0.4rem 1rem;
+    animation: pulse 2s infinite;
+}
+
+.audi-navbar .highlight-nav-item:hover,
+.audi-navbar .highlight-nav-item.active {
+    color: var(--audi-white);
+    background-color: var(--audi-red);
+    animation: none;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(230, 51, 51, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 8px rgba(230, 51, 51, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(230, 51, 51, 0);
+    }
+}
+
+/* Audi dropdown */
+.audi-dropdown {
+    background-color: var(--audi-black);
+    border: 1px solid var(--audi-red);
+    border-radius: 4px;
+    padding: 0.5rem 0;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+    margin-top: 5px;
+}
+
+.audi-dropdown .dropdown-item {
+    color: var(--audi-white);
+    padding: 0.7rem 1.5rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    position: relative;
+    transition: all 0.2s;
+}
+
+.audi-dropdown .dropdown-item:hover {
+    background-color: var(--audi-red);
+    color: var(--audi-white);
+    padding-left: 2rem;
+}
+
+.audi-dropdown .dropdown-item:hover::before {
+    content: "→";
+    position: absolute;
+    left: 0.7rem;
+}
+
+.audi-dropdown .dropdown-item.active {
+    background-color: var(--audi-red);
+    color: var(--audi-white);
+    padding-left: 2rem;
+}
+
+.audi-dropdown .dropdown-item.active::before {
+    content: "→";
+    position: absolute;
+    left: 0.7rem;
+}
+
+.audi-dropdown .dropdown-divider {
+    border-top: 1px solid var(--audi-gray);
+    margin: 0.3rem 0;
+}
+
+/* Main content container */
+.main-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 2rem 0;
+}
+
+/* Audi alert */
+.audi-alert {
+    border-radius: 0;
+    border: none;
+    padding: 1rem 1.25rem;
+}
+
+.alert-primary {
+    background-color: var(--audi-red);
+    color: var(--audi-white);
+}
+
+/* Biometric capture containers */
+.biometric-capture-container {
+    position: relative;
+    margin: 20px auto;
+    max-width: 800px;
+    border-radius: 0;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--audi-gray);
+}
+
+/* Video elements for capture */
+.capture-video {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 0;
+    background-color: var(--audi-black);
+}
+
+/* Canvas elements for preview */
+.capture-canvas {
+    width: 100%;
+    height: auto;
+    display: none;
+    border-radius: 0;
+}
+
+/* Card styling */
+.card {
+    background-color: var(--audi-dark);
+    border: 1px solid var(--audi-gray);
+    border-radius: 0;
+}
+
+.card-header {
+    background-color: var(--audi-black);
+    border-bottom: 1px solid var(--audi-gray);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.biometric-card {
+    margin-bottom: 20px;
+    transition: transform 0.2s;
+    height: 100%;
+}
+
+.biometric-card:hover {
+    transform: translateY(-5px);
+}
+
+.biometric-card-icon {
+    font-size: 2rem;
+    margin-bottom: 15px;
+    color: var(--audi-red);
+}
+
+/* Dashboard cards grid */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-gap: 25px;
+    margin-bottom: 30px;
+}
+
+/* Button styling */
+.btn {
+    border-radius: 0;
+    text-transform: uppercase;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    padding: 0.5rem 1.5rem;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background-color: var(--audi-red);
+    border-color: var(--audi-red);
+}
+
+.btn-primary:hover, .btn-primary:focus {
+    background-color: #c62828;
+    border-color: #c62828;
+}
+
+.btn-outline-secondary {
+    color: var(--audi-silver);
+    border-color: var(--audi-gray);
+}
+
+.btn-outline-secondary:hover {
+    background-color: var(--audi-gray);
+    border-color: var(--audi-gray);
+    color: var(--audi-white);
+}
+
+/* Form controls */
+.form-control, .form-select {
+    background-color: var(--audi-dark);
+    border: 1px solid var(--audi-gray);
+    border-radius: 0;
+    color: var(--audi-white);
+    padding: 0.6rem 0.75rem;
+}
+
+.form-control:focus, .form-select:focus {
+    background-color: var(--audi-dark);
+    border-color: var(--audi-red);
+    box-shadow: 0 0 0 0.25rem rgba(230, 51, 51, 0.25);
+    color: var(--audi-white);
+}
+
+.form-label {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: var(--audi-silver);
+}
+
+/* Biometric status indicators */
+.biometric-status {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 0;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+/* Recording indicator animation */
+@keyframes pulse-opacity {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+.recording-indicator {
+    color: var(--audi-red);
+    animation: pulse-opacity 1.5s infinite;
+    display: none;
+}
+
+/* Processing message */
+.processing-message {
+    display: none;
+    margin-top: 15px;
+    padding: 10px;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: var(--audi-white);
+    border-radius: 0;
+    text-align: center;
+    text-transform: uppercase;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+}
+
+/* Proximity setup specific styles */
+.device-list {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid var(--audi-gray);
+}
+
+.device-list .list-group-item {
+    background-color: var(--audi-dark);
+    color: var(--audi-white);
+    border-color: var(--audi-gray);
+}
+
+.device-list .list-group-item:hover {
+    background-color: var(--audi-gray);
+}
+
+/* Vehicle registration styles */
+.vehicle-form-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* Footer styles */
+.footer {
+    padding: 30px 0;
+    margin-top: 50px;
+    background-color: var(--audi-black);
+    color: var(--audi-white);
+    border-top: 1px solid var(--audi-gray);
+}
+
+.footer p {
+    margin-bottom: 5px;
+}
+
+/* Media queries */
+@media (max-width: 576px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .biometric-card {
+        margin-bottom: 15px;
+    }
+}
+
+/* Instructions panel styles */
+.instructions-panel {
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 0;
+    padding: 20px;
+    margin-bottom: 25px;
+    border: 1px solid var(--audi-gray);
+}
+
+.instructions-panel h5 {
+    margin-bottom: 15px;
+    color: var(--audi-red);
+    text-transform: uppercase;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+}
+
+.instructions-panel ul {
+    padding-left: 20px;
+}
+
+.instructions-panel li {
+    margin-bottom: 10px;
+    color: var(--audi-silver);
+}
+
+/* Authentication forms */
+.auth-form-container {
+    max-width: 450px;
+    margin: 40px auto;
+    padding: 30px;
+    border-radius: 0;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    background-color: var(--audi-dark);
+    border: 1px solid var(--audi-gray);
+}
+
+.auth-logo {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.auth-title {
+    text-align: center;
+    margin-bottom: 30px;
+    font-weight: 300;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+/* Home page jumbotron */
+.home-jumbotron {
+    padding: 4rem;
+    background-color: var(--audi-black);
+    border-radius: 0;
+    margin-bottom: 3rem;
+    border: 1px solid var(--audi-gray);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.home-jumbotron h1 {
+    font-weight: 300;
+    letter-spacing: 0.05em;
+    margin-bottom: 1.5rem;
+}
+
+.home-jumbotron .lead {
+    font-weight: 300;
+    margin-bottom: 2rem;
+    color: var(--audi-silver);
+}
+
+.home-features {
+    margin-top: 4rem;
+    margin-bottom: 4rem;
+}
+
+.home-features h2 {
+    font-weight: 300;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+/* Custom headings */
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 300;
+    letter-spacing: 0.05em;
+}
+
+/* Vehicle gallery styles */
+.vehicle-preview-img {
+    max-width: 100%;
+    height: auto;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    border-radius: 5px;
+    background-color: var(--audi-dark);
+}
+
+/* Biometric animation styles */
+#biometric-animation-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+#animation-user-info {
+    transition: opacity 0.5s ease;
+    opacity: 0;
+    max-width: 800px;
+}
+
+.animation-hint {
+    transition: opacity 0.5s ease;
+}
+
+.animation-hint.fade-out {
+    opacity: 0;
+}
+
+.vehicle-gallery {
+    margin-top: 1rem;
+}
+
+.gallery-thumbnail {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 5px;
+    border-color: var(--audi-gallery-border) !important;
+    background-color: var(--audi-dark);
+}
+
+.gallery-thumbnail:hover {
+    border-color: var(--audi-gallery-hover) !important;
+    background-color: var(--audi-active-thumb);
+    transform: scale(1.05);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+}
+
+.gallery-thumbnail img {
+    transition: opacity 0.3s ease;
+}
+
+.gallery-thumbnail .text-muted {
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    transition: color 0.3s ease;
+}
+
+.gallery-thumbnail:hover .text-muted {
+    color: var(--audi-red) !important;
+}
+
+#mainVehicleImage img {
+    transition: opacity 0.3s ease;
+    max-height: 220px;
+    width: auto;
+    margin: 0 auto;
+    display: block;
+}

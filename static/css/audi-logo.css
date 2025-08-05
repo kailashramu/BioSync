@@ -1,0 +1,96 @@
+/* Audi logo styling - proper interlocked rings */
+.audi-logo {
+    position: relative;
+    width: 120px;
+    height: 30px;
+    margin: 5px 0;
+    background-color: transparent;
+    display: flex;
+    align-items: center;
+}
+
+.audi-logo-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+/* Create the four Audi rings using pure CSS - properly interlocked */
+.audi-ring {
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    border: 2px solid white;
+    border-radius: 50%;
+    top: 4px;
+    box-shadow: 0 0 5px rgba(0,0,0,0.3);
+}
+
+.audi-ring-1 {
+    left: 0;
+    z-index: 2;
+}
+
+.audi-ring-2 {
+    left: 18px;
+    z-index: 1;
+}
+
+.audi-ring-3 {
+    left: 36px;
+    z-index: 2;
+}
+
+.audi-ring-4 {
+    left: 54px;
+    z-index: 1;
+}
+
+/* Larger version for footer */
+.audi-logo-footer {
+    width: 140px;
+    height: 35px;
+}
+
+.audi-logo-footer .audi-ring {
+    width: 28px;
+    height: 28px;
+    border: 2px solid white;
+    top: 5px;
+    box-shadow: 0 0 8px rgba(0,0,0,0.3);
+}
+
+.audi-logo-footer .audi-ring-1 {
+    left: 0;
+}
+
+.audi-logo-footer .audi-ring-2 {
+    left: 23px;
+}
+
+.audi-logo-footer .audi-ring-3 {
+    left: 46px;
+}
+
+.audi-logo-footer .audi-ring-4 {
+    left: 69px;
+}
+
+/* Title and text styling */
+.navbar-brand span {
+    color: white !important;
+    font-weight: 500;
+    margin-left: 10px;
+    font-size: 1.2rem;
+    text-shadow: 0 0 5px rgba(0,0,0,0.3);
+}
+
+/* Footer text */
+.footer p {
+    color: white !important;
+    text-shadow: 0 0 5px rgba(0,0,0,0.3);
+}
+
+.footer .small {
+    opacity: 0.9;
+}

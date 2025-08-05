@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 350" width="800" height="350">
+  <!-- Generic Audi vehicle - silver -->
+  <style>
+    .body { fill: #c0c0c0; }
+    .windows { fill: #1e5799; }
+    .lights { fill: #ffcc00; }
+    .grille { fill: #111; }
+    .rings { fill: silver; }
+    .wheels { fill: #333; }
+    .rims { fill: #777; }
+    .shadow { fill: rgba(0,0,0,0.2); }
+    .highlight { fill: #fff; opacity: 0.1; }
+    .logo-text { fill: #333; font-family: Arial, sans-serif; font-weight: bold; }
+  </style>
+  
+  <!-- Car Shadow -->
+  <ellipse class="shadow" cx="400" cy="310" rx="340" ry="30"/>
+  
+  <!-- Car Body - Generic Audi -->
+  <path class="body" d="M150,230 C110,230 100,200 70,180 C40,160 30,210 90,245 L150,260 L650,260 L710,245 C770,210 760,160 730,180 C700,200 690,230 650,230 L150,230 Z"/>
+  <path class="body" d="M150,230 L150,160 L210,115 L590,115 L650,160 L650,230 L150,230 Z"/>
+  
+  <!-- Windows -->
+  <path class="windows" d="M220,170 L260,130 L540,130 L580,170 L580,180 L220,180 Z"/>
+  <path class="windows" d="M270,170 L290,145 L510,145 L530,170 L270,170 Z"/>
+  
+  <!-- Front Grille - Audi Signature Single Frame -->
+  <rect class="grille" x="110" y="190" width="90" height="35" rx="5"/>
+  
+  <!-- Audi Rings Logo -->
+  <circle class="rings" cx="155" cy="207" r="7"/>
+  <circle class="rings" cx="171" cy="207" r="7"/>
+  <circle class="rings" cx="139" cy="207" r="7"/>
+  <circle class="rings" cx="123" cy="207" r="7"/>
+  
+  <!-- Headlights - LED Style -->
+  <path class="lights" d="M100,190 L110,190 L110,215 L100,215 Z"/>
+  <rect class="lights" x="200" y="190" width="10" height="25"/>
+  
+  <!-- Wheels -->
+  <circle class="wheels" cx="200" cy="255" r="38"/>
+  <circle class="rims" cx="200" cy="255" r="21"/>
+  <circle class="wheels" cx="600" cy="255" r="38"/>
+  <circle class="rims" cx="600" cy="255" r="21"/>
+  
+  <!-- Body Highlights -->
+  <path class="highlight" d="M150,160 L210,115 L590,115 L650,160 L650,165 L150,165 Z"/>
+  
+  <!-- Audi Logo Text -->
+  <text x="400" y="300" class="logo-text" font-size="30" text-anchor="middle">AUDI</text>
+  <text x="400" y="330" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#333">Premium Automobile</text>
+</svg>

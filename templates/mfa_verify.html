@@ -1,0 +1,258 @@
+{% extends 'layout.html' %}
+
+{% block title %}Multi-Factor Authentication{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card bg-dark border-danger mb-4">
+                <div class="card-header bg-danger text-white d-flex align-items-center">
+                    <i class="bi bi-shield-lock me-2"></i>
+                    <h4 class="mb-0">Multi-Factor Authentication Required</h4>
+                </div>
+                <div class="card-body">
+                    <p class="mb-4">Please complete biometric verification to continue to your account.</p>
+                    
+                    <div class="alert alert-info mb-4">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-info-circle fs-3 me-3"></i>
+                            <div>
+                                <strong>Security Notice:</strong> This extra step helps protect your account by verifying your identity using your biometric data.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5>Choose verification method:</h5>
+                        <div class="row mt-3">
+                            {% if 'face' in available_biometrics %}
+                            <div class="col-md-6 mb-3">
+                                <div class="card h-100 {% if preferred_method == 'face' %}border-primary{% endif %}">
+                                    <div class="card-body">
+                                        <h5 class="card-title">
+                                            <i class="bi bi-person-badge me-2"></i> Facial Recognition
+                                        </h5>
+                                        <p class="card-text">Verify your identity using your face.</p>
+                                        <button class="btn btn-primary w-100" onclick="startBiometricVerification('face')">
+                                            Use Face
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if 'voice' in available_biometrics %}
+                            <div class="col-md-6 mb-3">
+                                <div class="card h-100 {% if preferred_method == 'voice' %}border-primary{% endif %}">
+                                    <div class="card-body">
+                                        <h5 class="card-title">
+                                            <i class="bi bi-mic me-2"></i> Voice Recognition
+                                        </h5>
+                                        <p class="card-text">Verify your identity using your voice.</p>
+                                        <button class="btn btn-primary w-100" onclick="startBiometricVerification('voice')">
+                                            Use Voice
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if 'retina' in available_biometrics %}
+                            <div class="col-md-6 mb-3">
+                                <div class="card h-100 {% if preferred_method == 'retina' %}border-primary{% endif %}">
+                                    <div class="card-body">
+                                        <h5 class="card-title">
+                                            <i class="bi bi-eye me-2"></i> Retina Scan
+                                        </h5>
+                                        <p class="card-text">Verify your identity using your retina scan.</p>
+                                        <button class="btn btn-primary w-100" onclick="startBiometricVerification('retina')">
+                                            Use Retina Scan
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if 'proximity' in available_biometrics %}
+                            <div class="col-md-6 mb-3">
+                                <div class="card h-100 {% if preferred_method == 'proximity' %}border-primary{% endif %}">
+                                    <div class="card-body">
+                                        <h5 class="card-title">
+                                            <i class="bi bi-bluetooth me-2"></i> Proximity Key
+                                        </h5>
+                                        <p class="card-text">Verify your identity using your proximity device.</p>
+                                        <button class="btn btn-primary w-100" onclick="startBiometricVerification('proximity')">
+                                            Use Proximity
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-light">
+                            <i class="bi bi-box-arrow-left me-2"></i> Cancel and Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Include biometric validation containers -->
+    {% include 'partial_biometrics.html' %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Include required JavaScript files for biometrics -->
+<script src="{{ url_for('static', filename='js/biometrics.js') }}"></script>
+<script src="{{ url_for('static', filename='js/face.js') }}"></script>
+<script src="{{ url_for('static', filename='js/voice.js') }}"></script>
+<script src="{{ url_for('static', filename='js/retina.js') }}"></script>
+
+<script>
+// Define wrapper functions to provide consistent API naming across different contexts
+function initFaceCapture() {
+    console.log("Initializing face capture for MFA...");
+    if (typeof initFaceBiometrics === 'function') {
+        initFaceBiometrics();
+    } else {
+        console.error("Face biometrics initialization function not found!");
+        alert("Face verification is not available at this time. Please try another method.");
+    }
+}
+
+function initVoiceCapture() {
+    console.log("Initializing voice capture for MFA...");
+    if (typeof initVoiceBiometrics === 'function') {
+        initVoiceBiometrics();
+    } else {
+        console.error("Voice biometrics initialization function not found!");
+        alert("Voice verification is not available at this time. Please try another method.");
+    }
+}
+
+function initRetinaCapture() {
+    console.log("Initializing retina capture for MFA...");
+    if (typeof initRetinaBiometrics === 'function') {
+        initRetinaBiometrics();
+    } else {
+        console.error("Retina biometrics initialization function not found!");
+        alert("Retina verification is not available at this time. Please try another method.");
+    }
+}
+
+function initProximityVerification() {
+    console.log("Initializing proximity verification for MFA...");
+    if (typeof initProximityBiometrics === 'function') {
+        initProximityBiometrics();
+    } else {
+        console.error("Proximity verification function not found!");
+        alert("Proximity verification is not available at this time. Please try another method.");
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log("MFA verification page loaded");
+    
+    // Check if biometric elements are properly included
+    if (!document.getElementById('face-video') && !document.getElementById('voice-audio')) {
+        console.error("Biometric elements not found in DOM - checking for included template");
+    }
+    
+    // Auto-start with preferred method if one is specified
+    {% if preferred_method %}
+    setTimeout(() => {
+        console.log("Auto-starting with preferred method: {{ preferred_method }}");
+        startBiometricVerification('{{ preferred_method }}');
+    }, 500);
+    {% endif %}
+});
+
+function startBiometricVerification(biometricType) {
+    console.log("Starting biometric verification with method:", biometricType);
+    
+    // Show the appropriate biometric container
+    const containers = document.querySelectorAll('.biometric-container');
+    containers.forEach(container => {
+        container.style.display = 'none';
+    });
+    
+    const targetContainer = document.querySelector(`.${biometricType}-container`);
+    if (targetContainer) {
+        targetContainer.style.display = 'block';
+        console.log(`Showing ${biometricType} container`);
+    } else {
+        console.error(`Container for ${biometricType} not found!`);
+    }
+    
+    // Start the appropriate biometric validation
+    switch(biometricType) {
+        case 'face':
+            initFaceCapture();
+            break;
+        case 'voice':
+            initVoiceCapture();
+            break;
+        case 'retina':
+            initRetinaCapture();
+            break;
+        case 'proximity':
+            initProximityVerification();
+            break;
+        default:
+            console.error("Unknown biometric type:", biometricType);
+    }
+}
+
+// When biometric validation is successful, complete MFA
+function onBiometricValidationSuccess(validationData) {
+    console.log("Biometric validation successful:", validationData);
+    
+    // Send the validation result to the server to complete MFA
+    fetch('{{ url_for("auth.mfa_complete") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+        },
+        body: JSON.stringify({
+            biometric_type: validationData.biometric_type,
+            success: true,
+            next: '{{ next_page }}'
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("MFA completion response:", data);
+        if (data.success && data.redirect) {
+            // Redirect to the specified URL
+            console.log("MFA successful, redirecting to:", data.redirect);
+            window.location.href = data.redirect;
+        }
+    })
+    .catch(error => {
+        console.error('Error completing MFA:', error);
+        alert("There was a problem completing the verification. Please try again.");
+    });
+}
+
+// Handle validation results from the biometric API
+document.addEventListener('biometricValidationResult', function(event) {
+    console.log("Received biometric validation result event:", event.detail);
+    const validationData = event.detail;
+    
+    if (validationData.success) {
+        // Complete MFA verification
+        onBiometricValidationSuccess(validationData);
+    } else {
+        console.error("Biometric validation failed:", validationData.error);
+        alert("Biometric verification failed. Please try again or use a different method.");
+    }
+});
+</script>
+{% endblock %}

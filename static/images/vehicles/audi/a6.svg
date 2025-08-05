@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 350" width="800" height="350">
+  <!-- Audi A6 stylized sedan - black -->
+  <style>
+    .body { fill: #222; }
+    .windows { fill: #1e5799; }
+    .lights { fill: #ffcc00; }
+    .grille { fill: #111; }
+    .rings { fill: silver; }
+    .wheels { fill: #333; }
+    .rims { fill: #777; }
+    .shadow { fill: rgba(0,0,0,0.2); }
+    .highlight { fill: #fff; opacity: 0.1; }
+  </style>
+  
+  <!-- Car Shadow -->
+  <ellipse class="shadow" cx="400" cy="310" rx="330" ry="30"/>
+  
+  <!-- Car Body - A6 Sedan -->
+  <path class="body" d="M160,230 C120,230 110,200 80,180 C50,160 40,210 100,245 L160,260 L640,260 L700,245 C760,210 750,160 720,180 C690,200 680,230 640,230 L160,230 Z"/>
+  <path class="body" d="M160,230 L160,170 L210,130 L590,130 L640,170 L640,230 L160,230 Z"/>
+  
+  <!-- Windows -->
+  <path class="windows" d="M220,170 L250,140 L550,140 L580,170 L580,180 L220,180 Z"/>
+  <path class="windows" d="M270,170 L290,150 L510,150 L530,170 L270,170 Z"/>
+  
+  <!-- Front Grille - Audi Signature Single Frame -->
+  <rect class="grille" x="120" y="190" width="80" height="30" rx="5"/>
+  
+  <!-- Audi Rings Logo -->
+  <circle class="rings" cx="160" cy="205" r="6"/>
+  <circle class="rings" cx="174" cy="205" r="6"/>
+  <circle class="rings" cx="146" cy="205" r="6"/>
+  <circle class="rings" cx="132" cy="205" r="6"/>
+  
+  <!-- Headlights - LED Style -->
+  <path class="lights" d="M110,190 L120,190 L120,210 L110,210 Z"/>
+  <rect class="lights" x="200" y="190" width="10" height="20"/>
+  
+  <!-- Wheels -->
+  <circle class="wheels" cx="200" cy="250" r="35"/>
+  <circle class="rims" cx="200" cy="250" r="20"/>
+  <circle class="wheels" cx="600" cy="250" r="35"/>
+  <circle class="rims" cx="600" cy="250" r="20"/>
+  
+  <!-- Body Highlights -->
+  <path class="highlight" d="M160,170 L210,130 L590,130 L640,170 L640,175 L160,175 Z"/>
+  
+  <!-- Text Label -->
+  <text x="400" y="330" font-family="Arial, sans-serif" font-size="20" text-anchor="middle" fill="#333">Audi A6</text>
+</svg>

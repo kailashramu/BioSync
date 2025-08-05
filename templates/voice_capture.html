@@ -1,0 +1,81 @@
+{% extends "layout.html" %}
+
+{% block title %}Voice Biometrics - BioSecure{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h1>Voice Biometrics Registration</h1>
+        <p class="lead">Record your voice for biometric authentication</p>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-lg-8 mx-auto">
+        <div class="instructions-panel">
+            <h5><i class="bi bi-info-circle me-2"></i>Instructions</h5>
+            <ul>
+                <li>Find a quiet environment with minimal background noise</li>
+                <li>Speak clearly and at a normal pace</li>
+                <li>Record a sample of your voice using the microphone</li>
+                <li>Listen to the recording to ensure quality</li>
+                <li>Save your voice sample when you're satisfied</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div id="voice-capture-container" class="biometric-capture-container">
+    <div class="card">
+        <div class="card-body text-center">
+            <div class="mb-4">
+                <i class="bi bi-mic fs-1 text-primary"></i>
+                <h4 class="mt-2">Voice Recording</h4>
+            </div>
+            
+            <div id="recording-indicator" class="recording-indicator mb-3">
+                <i class="bi bi-record-circle me-1"></i> Recording in progress...
+            </div>
+            
+            <audio id="audio-player" controls class="w-100 mb-4" style="display: none;"></audio>
+            
+            <form id="voice-form" method="POST" action="{{ url_for('biometrics.voice_capture') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <!-- Hidden field will be populated with voice data by JavaScript -->
+            </form>
+            
+            <div class="d-flex justify-content-center gap-2">
+                <button id="start-record-button" class="btn btn-primary">
+                    <i class="bi bi-record-circle me-1"></i> Start Recording
+                </button>
+                <button id="stop-record-button" class="btn btn-danger" disabled>
+                    <i class="bi bi-stop-circle me-1"></i> Stop Recording
+                </button>
+                <button id="retake-voice-button" class="btn btn-secondary" disabled>
+                    <i class="bi bi-arrow-repeat me-1"></i> Retake
+                </button>
+                <button id="save-voice-button" class="btn btn-success" disabled>
+                    <i class="bi bi-save me-1"></i> Save
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="processing-message" class="processing-message">
+        Processing voice data...
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-lg-8 mx-auto">
+        <div class="alert alert-info">
+            <h5><i class="bi bi-shield-check me-2"></i>Privacy Information</h5>
+            <p class="mb-0">Your voice data is processed and stored securely. The recording is used only for authentication purposes and is encrypted in our database. You can reset or delete your voice biometric data at any time from your dashboard.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/voice.js') }}"></script>
+{% endblock %}

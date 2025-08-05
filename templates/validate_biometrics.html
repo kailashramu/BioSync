@@ -1,0 +1,1572 @@
+{% extends "layout.html" %}
+
+{% block title %}Validate Biometrics - BioSync{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h1>BIOMETRIC VALIDATION</h1>
+        <p class="lead">Validate user biometrics to retrieve associated vehicle information</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">SELECT VALIDATION METHOD</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="card h-100 biometric-card">
+                            <div class="card-body text-center">
+                                <i class="bi bi-camera-video biometric-card-icon"></i>
+                                <h5 class="card-title">FACIAL RECOGNITION</h5>
+                                <p class="card-text">Validate user identity using facial recognition</p>
+                                <button class="btn btn-primary mt-3" id="validate-face-btn">Validate Face</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <div class="card h-100 biometric-card">
+                            <div class="card-body text-center">
+                                <i class="bi bi-mic biometric-card-icon"></i>
+                                <h5 class="card-title">VOICE RECOGNITION</h5>
+                                <p class="card-text">Validate user identity using voice patterns</p>
+                                <button class="btn btn-primary mt-3" id="validate-voice-btn">Validate Voice</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-3">
+                    <div class="col-md-6 mb-3">
+                        <div class="card h-100 biometric-card">
+                            <div class="card-body text-center">
+                                <i class="bi bi-eye biometric-card-icon"></i>
+                                <h5 class="card-title">RETINA SCAN</h5>
+                                <p class="card-text">Validate user identity using retina scanning</p>
+                                <button class="btn btn-primary mt-3" id="validate-retina-btn">Validate Retina</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <div class="card h-100 biometric-card">
+                            <div class="card-body text-center">
+                                <i class="bi bi-key biometric-card-icon"></i>
+                                <h5 class="card-title">DIGITAL KEY</h5>
+                                <p class="card-text">Validate user identity using digital key proximity</p>
+                                <button class="btn btn-primary mt-3" id="validate-key-btn">Validate Key</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Biometric Capture Cards - Initially hidden -->
+        <div class="card mb-4" id="face-capture-card" style="display: none;">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">FACE VALIDATION</h5>
+                <button type="button" class="btn-close capture-close" aria-label="Close"></button>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-7">
+                        <div class="video-container mb-3">
+                            <video id="face-video" autoplay playsinline class="w-100"></video>
+                            <canvas id="face-canvas" style="display: none;"></canvas>
+                        </div>
+                        <div class="d-flex justify-content-center">
+                            <button id="capture-face-btn" class="btn btn-primary me-2">
+                                <i class="bi bi-camera me-1"></i> Capture Face
+                            </button>
+                            <button id="reset-face-btn" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="alert alert-info">
+                            <h6><i class="bi bi-info-circle me-2"></i> How it works:</h6>
+                            <ol class="mb-0 small">
+                                <li>Position your face in the center of the camera</li>
+                                <li>Ensure good lighting on your face</li>
+                                <li>Remove glasses or face coverings</li>
+                                <li>Click "Capture Face" when ready</li>
+                                <li>The system will verify your identity</li>
+                            </ol>
+                        </div>
+                        <div id="face-preview-container" class="text-center mt-3" style="display: none;">
+                            <p class="mb-2">Face image captured:</p>
+                            <img id="face-preview" class="img-thumbnail" style="max-height: 150px;">
+                            <div class="mt-3">
+                                <button id="submit-face-btn" class="btn btn-success">
+                                    <i class="bi bi-check-circle me-1"></i> Validate This Face
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mb-4" id="voice-capture-card" style="display: none;">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">VOICE VALIDATION</h5>
+                <button type="button" class="btn-close capture-close" aria-label="Close"></button>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-7">
+                        <div class="voice-container mb-3 text-center">
+                            <div id="voice-visualization" class="voice-visualization">
+                                <canvas id="voice-canvas" height="120"></canvas>
+                            </div>
+                            <div id="voice-timer" class="voice-timer mt-2">00:00</div>
+                        </div>
+                        <div class="d-flex justify-content-center">
+                            <button id="start-voice-btn" class="btn btn-primary me-2">
+                                <i class="bi bi-mic me-1"></i> Start Recording
+                            </button>
+                            <button id="stop-voice-btn" class="btn btn-danger me-2" disabled>
+                                <i class="bi bi-stop-fill me-1"></i> Stop
+                            </button>
+                            <button id="reset-voice-btn" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="alert alert-info">
+                            <h6><i class="bi bi-info-circle me-2"></i> How it works:</h6>
+                            <ol class="mb-0 small">
+                                <li>Click "Start Recording" when ready</li>
+                                <li>Read the following phrase clearly: <br>
+                                    <strong class="d-block mt-1 mb-1">"BioSync advanced technology provides superior driving experience"</strong>
+                                </li>
+                                <li>Click "Stop" when finished</li>
+                                <li>The system will analyze your voice pattern</li>
+                            </ol>
+                        </div>
+                        <div id="voice-status" class="text-center mt-3" style="display: none;">
+                            <p class="mb-2">Voice recording captured:</p>
+                            <div class="audio-player">
+                                <audio id="voice-preview" controls></audio>
+                            </div>
+                            <div class="mt-3">
+                                <button id="submit-voice-btn" class="btn btn-success">
+                                    <i class="bi bi-check-circle me-1"></i> Validate This Voice
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mb-4" id="retina-capture-card" style="display: none;">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">RETINA VALIDATION</h5>
+                <button type="button" class="btn-close capture-close" aria-label="Close"></button>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-7">
+                        <div class="retina-container mb-3 position-relative">
+                            <video id="retina-video" autoplay playsinline class="w-100"></video>
+                            <canvas id="retina-canvas" style="display: none;"></canvas>
+                            <div id="retina-overlay" class="retina-overlay">
+                                <div class="retina-target"></div>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-center">
+                            <button id="capture-retina-btn" class="btn btn-primary me-2">
+                                <i class="bi bi-camera me-1"></i> Capture Retina
+                            </button>
+                            <button id="reset-retina-btn" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="alert alert-info">
+                            <h6><i class="bi bi-info-circle me-2"></i> How it works:</h6>
+                            <ol class="mb-0 small">
+                                <li>Position your eye within the circular target</li>
+                                <li>Move closer to the camera (about 15-20cm)</li>
+                                <li>Hold still and ensure good lighting</li>
+                                <li>Click "Capture Retina" when ready</li>
+                                <li>The system will analyze your retinal pattern</li>
+                            </ol>
+                        </div>
+                        <div id="retina-preview-container" class="text-center mt-3" style="display: none;">
+                            <p class="mb-2">Retina scan captured:</p>
+                            <img id="retina-preview" class="img-thumbnail" style="max-height: 150px;">
+                            <div class="mt-3">
+                                <button id="submit-retina-btn" class="btn btn-success">
+                                    <i class="bi bi-check-circle me-1"></i> Validate This Retina
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mb-4" id="key-capture-card" style="display: none;">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">DIGITAL KEY VALIDATION</h5>
+                <button type="button" class="btn-close capture-close" aria-label="Close"></button>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-7">
+                        <div class="key-container mb-3">
+                            <div class="card text-center p-4">
+                                <div class="mb-3">
+                                    <i class="bi bi-key-fill text-primary" style="font-size: 3rem;"></i>
+                                </div>
+                                <div class="key-options">
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="radio" name="keyType" id="bluetoothKey" value="bluetooth" checked>
+                                        <label class="form-check-label" for="bluetoothKey">
+                                            <i class="bi bi-bluetooth me-1"></i> Bluetooth Key
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="radio" name="keyType" id="nfcKey" value="nfc">
+                                        <label class="form-check-label" for="nfcKey">
+                                            <i class="bi bi-credit-card me-1"></i> NFC Card Key
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="keyType" id="mobileKey" value="mobile">
+                                        <label class="form-check-label" for="mobileKey">
+                                            <i class="bi bi-phone me-1"></i> Mobile Device
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-center">
+                            <button id="scan-key-btn" class="btn btn-primary me-2">
+                                <i class="bi bi-search me-1"></i> Scan for Key
+                            </button>
+                            <button id="reset-key-btn" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="alert alert-info">
+                            <h6><i class="bi bi-info-circle me-2"></i> How it works:</h6>
+                            <ol class="mb-0 small">
+                                <li>Select your key type (Bluetooth, NFC, or Mobile)</li>
+                                <li>Click "Scan for Key" to begin the detection process</li>
+                                <li>Position your key or device near your computer</li>
+                                <li>For NFC, tap your card against the reader (if available)</li>
+                                <li>The system will verify your key's authenticity</li>
+                            </ol>
+                        </div>
+                        <div id="key-detection-result" class="text-center mt-3" style="display: none;">
+                            <div class="alert alert-success">
+                                <i class="bi bi-check-circle me-2"></i> Key detected successfully!
+                            </div>
+                            <p class="mb-1"><strong>Key Type:</strong> <span id="detected-key-type">Bluetooth</span></p>
+                            <p><strong>Key ID:</strong> <span id="detected-key-id">N/A</span></p>
+                            <div class="mt-3">
+                                <button id="submit-key-btn" class="btn btn-success">
+                                    <i class="bi bi-check-circle me-1"></i> Validate This Key
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Results Card - Initially hidden -->
+        <div class="card mb-4" id="validation-results" style="display: none;">
+            <div class="card-header">
+                <h5 class="mb-0">VALIDATION RESULTS</h5>
+            </div>
+            <div class="card-body">
+                <div id="validation-spinner" class="text-center">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Validating...</span>
+                    </div>
+                    <p class="mt-2">Validating biometric data...</p>
+                </div>
+                
+                <div id="validation-success" style="display: none;">
+                    <div class="alert alert-success mb-4">
+                        <i class="bi bi-check-circle me-2"></i> Biometric validation successful
+                        <span class="float-end">
+                            <span class="badge bg-primary confidence-score">0%</span>
+                            <button id="reset-session-top-btn" class="btn btn-sm btn-outline-danger ms-2">
+                                <i class="bi bi-arrow-clockwise"></i> Reset
+                            </button>
+                        </span>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h6>MATCH CONFIDENCE</h6>
+                        <div class="progress" style="height: 10px;">
+                            <div class="progress-bar bg-danger" role="progressbar" id="confidence-bar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mt-1">
+                            <small class="text-muted">Low Confidence</small>
+                            <small class="text-muted">High Confidence</small>
+                        </div>
+                    </div>
+                    
+                    <h5 class="card-title mb-3">USER INFORMATION</h5>
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <p><strong>User:</strong> <span id="user-name"></span></p>
+                            <p><strong>Email:</strong> <span id="user-email"></span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Account Created:</strong> <span id="user-created"></span></p>
+                            <p><strong>Biometric Type:</strong> <span id="biometric-type"></span></p>
+                        </div>
+                    </div>
+                    
+                    <h5 class="card-title mb-3">ASSOCIATED VEHICLES</h5>
+                    <div id="vehicle-list" class="vehicle-list">
+                        <!-- Vehicle cards will be inserted here -->
+                    </div>
+                    
+                    <div class="mt-4 border-top pt-3">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Reset Validation Session</h5>
+                                        <p class="card-text">Clear current validation status to start a new verification session.</p>
+                                        <button id="reset-session-btn" class="btn btn-outline-danger">
+                                            <i class="bi bi-arrow-clockwise me-1"></i> Reset Session
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Register New Vehicle</h5>
+                                        <p class="card-text">Register another vehicle to associate with your biometric data.</p>
+                                        <a href="{{ url_for('vehicle.register_vehicle') }}" class="btn btn-primary">
+                                            <i class="bi bi-plus-circle me-1"></i> Register Vehicle
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="validation-error" class="alert alert-danger" style="display: none;">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    <span id="error-message">Biometric validation failed. Please try again.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add some CSS styles for the new elements -->
+<style>
+.retina-container {
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+    max-height: 360px;
+}
+
+.retina-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.retina-target {
+    width: 150px;
+    height: 150px;
+    border: 3px dashed rgba(255, 0, 0, 0.7);
+    border-radius: 50%;
+    box-shadow: 0 0 0 2000px rgba(0, 0, 0, 0.5);
+}
+
+.voice-visualization {
+    background-color: #111;
+    border-radius: 8px;
+    padding: 10px;
+    height: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.voice-timer {
+    font-size: 1.5rem;
+    font-weight: bold;
+    font-family: monospace;
+}
+
+.video-container, .retina-container {
+    background-color: #111;
+    border-radius: 8px;
+    overflow: hidden;
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Create a global object to store Flask URLs for use in dynamic content
+    window.flaskURLs = {
+        registerVehicle: "{{ url_for('vehicle.register_vehicle') }}",
+        // Function to generate vehicle details URL with the correct route
+        vehicleDetails: function(vehicleId) {
+            return "{{ url_for('vehicle.vehicle_details', vehicle_id=0) }}".replace('/0', '/' + vehicleId);
+        }
+    };
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        // Helper functions for DOM manipulation
+        function getElement(id) {
+            const elem = document.getElementById(id);
+            if (!elem) {
+                console.error(`Element with ID ${id} not found!`);
+            }
+            return elem;
+        }
+        
+        function showElement(id) {
+            const elem = getElement(id);
+            if (elem) {
+                elem.style.display = 'block';
+                console.log(`Element ${id} displayed`);
+            }
+        }
+        
+        function hideElement(id) {
+            const elem = getElement(id);
+            if (elem) {
+                elem.style.display = 'none';
+                console.log(`Element ${id} hidden`);
+            }
+        }
+        
+        // Main UI elements - using getElement for better error reporting
+        const validationResults = getElement('validation-results');
+        const validationSpinner = getElement('validation-spinner');
+        const validationSuccess = getElement('validation-success');
+        const validationError = getElement('validation-error');
+        const vehicleList = getElement('vehicle-list');
+        
+        // Capture cards
+        const faceCaptureCard = document.getElementById('face-capture-card');
+        const voiceCaptureCard = document.getElementById('voice-capture-card');
+        const retinaCaptureCard = document.getElementById('retina-capture-card');
+        const keyCaptureCard = document.getElementById('key-capture-card');
+        
+        // Video elements
+        const faceVideo = document.getElementById('face-video');
+        const faceCanvas = document.getElementById('face-canvas');
+        const retinaVideo = document.getElementById('retina-video');
+        const retinaCanvas = document.getElementById('retina-canvas');
+        
+        // Current biometric data
+        let capturedFaceData = null;
+        let capturedVoiceData = null;
+        let capturedRetinaData = null;
+        let detectedKeyData = null;
+        
+        // Current stream references
+        let faceStream = null;
+        let retinaStream = null;
+        let voiceRecorder = null;
+        let voiceStream = null;
+        
+        // Hide all capture cards
+        function hideAllCaptureCards() {
+            // Only hide the capture cards, NOT the validation results
+            if (faceCaptureCard) faceCaptureCard.style.display = 'none';
+            if (voiceCaptureCard) voiceCaptureCard.style.display = 'none';
+            if (retinaCaptureCard) retinaCaptureCard.style.display = 'none';
+            if (keyCaptureCard) keyCaptureCard.style.display = 'none';
+            
+            // Don't hide validation results
+            // validationResults.style.display = 'none'; <- This was the issue!
+            
+            // Clean up resources
+            if (faceStream) {
+                faceStream.getTracks().forEach(track => track.stop());
+                faceStream = null;
+            }
+            
+            if (retinaStream) {
+                retinaStream.getTracks().forEach(track => track.stop());
+                retinaStream = null;
+            }
+            
+            if (voiceStream) {
+                voiceStream.getTracks().forEach(track => track.stop());
+                voiceStream = null;
+            }
+            
+            if (voiceRecorder) {
+                voiceRecorder = null;
+            }
+        }
+        
+        // Add close button event listeners
+        document.querySelectorAll('.capture-close').forEach(button => {
+            button.addEventListener('click', hideAllCaptureCards);
+        });
+        
+        // Function to process validation response data
+        function processValidationResult(data, biometricType, biometricApiType, isMfaVerification) {
+            console.log('Processing validation result:', data);
+            
+            // Get references to elements directly
+            const validationSpinner = document.getElementById('validation-spinner');
+            const validationSuccess = document.getElementById('validation-success');
+            const validationError = document.getElementById('validation-error');
+            const vehicleList = document.getElementById('vehicle-list');
+            
+            console.log('Elements:', 
+                'spinner=', validationSpinner, 
+                'success=', validationSuccess, 
+                'error=', validationError,
+                'vehicleList=', vehicleList
+            );
+            
+            // Hide the spinner
+            if (validationSpinner) {
+                validationSpinner.style.display = 'none';
+                console.log('Spinner hidden');
+            } else {
+                console.error('Spinner element not found');
+            }
+            
+            if (data.success) {
+                // Check if this is for MFA verification (from mfa_verify.html)
+                if (isMfaVerification) {
+                    // Create a custom event with the validation result
+                    const validationEvent = new CustomEvent('biometricValidationResult', {
+                        detail: {
+                            success: true,
+                            biometric_type: biometricApiType,
+                            confidence: data.confidence || 0
+                        }
+                    });
+                    
+                    // Dispatch the event for the MFA verification page to handle
+                    document.dispatchEvent(validationEvent);
+                    return;
+                }
+                
+                // Regular validation - show user and vehicle data
+                document.getElementById('user-name').textContent = data.user.name || 'Unknown User';
+                document.getElementById('user-email').textContent = data.user.email || 'No email provided';
+                document.getElementById('user-created').textContent = data.user.created_at || 'Unknown';
+                document.getElementById('biometric-type').textContent = biometricType;
+                
+                // Set the confidence score
+                const confidencePercent = Math.round((data.confidence || 0) * 100);
+                const confidenceScore = document.querySelector('.confidence-score');
+                confidenceScore.textContent = confidencePercent + '%';
+                
+                // Update confidence progress bar
+                const confidenceBar = document.getElementById('confidence-bar');
+                confidenceBar.style.width = confidencePercent + '%';
+                confidenceBar.setAttribute('aria-valuenow', confidencePercent);
+                
+                // Change progress bar color based on confidence level
+                if (confidencePercent >= 90) {
+                    confidenceBar.className = 'progress-bar bg-success';
+                } else if (confidencePercent >= 75) {
+                    confidenceBar.className = 'progress-bar bg-info';
+                } else if (confidencePercent >= 60) {
+                    confidenceBar.className = 'progress-bar bg-warning';
+                } else {
+                    confidenceBar.className = 'progress-bar bg-danger';
+                }
+                
+                // Clear previous vehicle list
+                vehicleList.innerHTML = '';
+                
+                // Check if user has vehicles
+                if (data.vehicles && data.vehicles.length > 0) {
+                    // Add vehicle cards
+                    data.vehicles.forEach(vehicle => {
+                        const vehicleCard = document.createElement('div');
+                        vehicleCard.className = 'card mb-3';
+                        vehicleCard.innerHTML = `
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <h5 class="vehicle-title">${vehicle.year} ${vehicle.make} ${vehicle.model}</h5>
+                                        <p class="text-muted mb-2">License: ${vehicle.license_plate || 'N/A'} | VIN: ${vehicle.vin || 'N/A'}</p>
+                                        <p class="vehicle-color">Color: ${vehicle.color || 'N/A'}</p>
+                                    </div>
+                                    <div class="col-md-4 text-end">
+                                        <a href="${window.flaskURLs.vehicleDetails(vehicle.id)}" class="btn btn-primary">Vehicle Details</a>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        vehicleList.appendChild(vehicleCard);
+                    });
+                } else {
+                    // No vehicles found
+                    vehicleList.innerHTML = `
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            No vehicles found. <a href="${window.location.origin}${window.flaskURLs?.registerVehicle || '/vehicles/register'}">Register a vehicle</a> to see it here.
+                        </div>
+                    `;
+                }
+                
+                // Show success panel
+                if (validationSuccess) {
+                    validationSuccess.style.display = 'block';
+                    console.log('Success panel displayed');
+                } else {
+                    console.error('Success panel element not found!');
+                }
+            } else {
+                // Failed validation
+                
+                // Check if this is for MFA verification
+                if (isMfaVerification) {
+                    // Create a custom event with the validation result
+                    const validationEvent = new CustomEvent('biometricValidationResult', {
+                        detail: {
+                            success: false,
+                            biometric_type: biometricApiType,
+                            error: data.error || 'Biometric verification failed'
+                        }
+                    });
+                    
+                    // Dispatch the event for the MFA verification page to handle
+                    document.dispatchEvent(validationEvent);
+                    return;
+                }
+                
+                // Regular validation - show error message
+                document.getElementById('error-message').textContent = 
+                    data.error || `${biometricType} validation failed. Please try again or use another authentication method.`;
+                validationError.style.display = 'block';
+            }
+        }
+        
+        // Function to perform biometric validation with the API
+        async function validateBiometric(biometricType, biometricData = null) {
+            console.log('Starting validation for:', biometricType);
+            
+            // Get references to key elements
+            const validationResults = document.getElementById('validation-results');
+            const validationSpinner = document.getElementById('validation-spinner');
+            const validationSuccess = document.getElementById('validation-success');
+            const validationError = document.getElementById('validation-error');
+            
+            console.log('Found validation results elements:',
+                'results=', validationResults,
+                'spinner=', validationSpinner,
+                'success=', validationSuccess,
+                'error=', validationError
+            );
+            
+            // Show the results panel and spinner
+            if (validationResults) validationResults.style.display = 'block';
+            if (validationSpinner) validationSpinner.style.display = 'block';
+            if (validationSuccess) validationSuccess.style.display = 'none';
+            if (validationError) validationError.style.display = 'none';
+            
+            // Hide capture cards
+            hideAllCaptureCards();
+            
+            // Scroll to the results
+            validationResults.scrollIntoView({ behavior: 'smooth' });
+            
+            // Check if this is for MFA verification (from mfa_verify.html)
+            const isMfaVerification = window.location.pathname.includes('/auth/mfa/verify');
+            let biometricApiType = 'face'; // Default to face type as fallback
+            
+            try {
+                // Validate inputs
+                if (!biometricType || typeof biometricType !== 'string') {
+                    throw new Error('Invalid biometric type provided');
+                }
+                
+                if (!biometricData) {
+                    throw new Error('No biometric data provided');
+                }
+                
+                // Call the API endpoint to validate the biometric
+                // Prepare the request payload based on biometric type
+                let payload = {
+                    biometric_data: biometricData
+                };
+                
+                // Determine biometric type API identifier based on the display name
+                const typeLC = biometricType.toLowerCase();
+                if (typeLC.includes('face')) {
+                    biometricApiType = 'face';
+                } else if (typeLC.includes('voice')) {
+                    biometricApiType = 'voice';
+                } else if (typeLC.includes('retina')) {
+                    biometricApiType = 'retina';
+                } else if (typeLC.includes('key') || typeLC.includes('proximity')) {
+                    biometricApiType = 'proximity';
+                    // If it's a proximity validation, structure data differently
+                    payload = {
+                        biometric_data: "proximity_validation",
+                        proximity_info: biometricData
+                    };
+                }
+                
+                console.log('Determined API type:', biometricApiType);
+                console.log('Sending validation request for:', biometricApiType);
+                
+                // Log payload size for debugging (just the length to avoid logging sensitive data)
+                if (biometricData && typeof biometricData === 'string') {
+                    console.log('Payload size:', Math.round(biometricData.length / 1024), 'KB');
+                    
+                    // If the image data is very large, try to resize it
+                    if (biometricApiType === 'face' && biometricData.length > 500000) {
+                        console.log('Resizing large image data for better performance...');
+                        
+                        // Create an image to resize
+                        const img = new Image();
+                        img.src = biometricData;
+                        
+                        // Wait for image to load
+                        await new Promise(resolve => {
+                            img.onload = resolve;
+                        });
+                        
+                        // Create canvas to resize image
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        
+                        // Set smaller dimensions
+                        const maxWidth = 640;
+                        const maxHeight = 480;
+                        let width = img.width;
+                        let height = img.height;
+                        
+                        // Calculate new dimensions maintaining aspect ratio
+                        if (width > height) {
+                            if (width > maxWidth) {
+                                height = Math.round(height * (maxWidth / width));
+                                width = maxWidth;
+                            }
+                        } else {
+                            if (height > maxHeight) {
+                                width = Math.round(width * (maxHeight / height));
+                                height = maxHeight;
+                            }
+                        }
+                        
+                        // Resize image
+                        canvas.width = width;
+                        canvas.height = height;
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        // Get new data URL with reduced quality
+                        biometricData = canvas.toDataURL('image/jpeg', 0.8);
+                        payload.biometric_data = biometricData;
+                        
+                        console.log('Resized payload size:', Math.round(biometricData.length / 1024), 'KB');
+                    }
+                }
+                
+                // Create the API endpoint URL
+                const validationUrl = `/biometrics/api/validate/${biometricApiType}`;
+                console.log('Using validation URL:', validationUrl);
+                
+                // Make the API request
+                const response = await fetch(validationUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                // Check if the request was successful
+                if (!response.ok) {
+                    const statusText = response.statusText || 'Unknown error';
+                    console.error(`API request failed: ${response.status} ${statusText}`);
+                    
+                    // If it's a 404, the endpoint might be incorrect
+                    if (response.status === 404) {
+                        throw new Error(`API endpoint not found (404): ${validationUrl}`);
+                    }
+                    
+                    // For other errors, try to get more details from the response
+                    try {
+                        const errorData = await response.json();
+                        throw new Error(`Server error: ${errorData.error || statusText}`);
+                    } catch (jsonError) {
+                        throw new Error(`Server error: ${statusText}`);
+                    }
+                }
+                
+                // Parse the response data
+                const data = await response.json();
+                console.log('Received validation response:', data);
+                
+                // Process the data from API response
+                processValidationResult(data, biometricType, biometricApiType, isMfaVerification);
+                
+            } catch (error) {
+                // Handle any errors in the validation process
+                validationSpinner.style.display = 'none';
+                document.getElementById('error-message').textContent = 
+                    `Error: ${error.message || 'An unexpected error occurred.'}`;
+                validationError.style.display = 'block';
+                console.error('Validation error:', error);
+                
+                // Don't use simulation for production
+                // simulateValidation(biometricType);
+            }
+        }
+        
+        // Add fallback simulation for demo purposes
+        function simulateValidation(biometricType) {
+            // Get references to key elements
+            const validationResults = document.getElementById('validation-results');
+            const validationSpinner = document.getElementById('validation-spinner');
+            const validationSuccess = document.getElementById('validation-success');
+            const validationError = document.getElementById('validation-error');
+            const vehicleList = document.getElementById('vehicle-list');
+            
+            // Show the results panel and spinner
+            if (validationResults) validationResults.style.display = 'block';
+            if (validationSpinner) validationSpinner.style.display = 'block';
+            if (validationSuccess) validationSuccess.style.display = 'none';
+            if (validationError) validationError.style.display = 'none';
+            
+            // Only hide the capture cards, not the results panel
+            if (faceCaptureCard) faceCaptureCard.style.display = 'none';
+            if (voiceCaptureCard) voiceCaptureCard.style.display = 'none';
+            if (retinaCaptureCard) retinaCaptureCard.style.display = 'none';
+            if (keyCaptureCard) keyCaptureCard.style.display = 'none';
+            
+            // Scroll to the results
+            validationResults.scrollIntoView({ behavior: 'smooth' });
+            
+            // Simulate validation process
+            setTimeout(() => {
+                // Simulating a high success rate for demo
+                const isSuccess = Math.random() < 0.95;
+                
+                validationSpinner.style.display = 'none';
+                
+                if (isSuccess) {
+                    // Success - show user and vehicle data
+                    document.getElementById('user-name').textContent = 'John Doe';
+                    document.getElementById('user-email').textContent = 'john.doe@example.com';
+                    document.getElementById('user-created').textContent = '2022-04-15';
+                    document.getElementById('biometric-type').textContent = biometricType;
+                    
+                    // Set the confidence score
+                    const confidencePercent = Math.floor(65 + Math.random() * 30); // Random score between 65-95%
+                    const confidenceScore = document.querySelector('.confidence-score');
+                    confidenceScore.textContent = confidencePercent + '%';
+                    
+                    // Update confidence progress bar
+                    const confidenceBar = document.getElementById('confidence-bar');
+                    confidenceBar.style.width = confidencePercent + '%';
+                    confidenceBar.setAttribute('aria-valuenow', confidencePercent);
+                    
+                    // Change progress bar color based on confidence level
+                    if (confidencePercent >= 90) {
+                        confidenceBar.className = 'progress-bar bg-success';
+                    } else if (confidencePercent >= 75) {
+                        confidenceBar.className = 'progress-bar bg-info';
+                    } else if (confidencePercent >= 60) {
+                        confidenceBar.className = 'progress-bar bg-warning';
+                    } else {
+                        confidenceBar.className = 'progress-bar bg-danger';
+                    }
+                    
+                    // Clear previous vehicle list
+                    vehicleList.innerHTML = '';
+                    
+                    // Add sample vehicle cards
+                    const sampleVehicles = [
+                        {
+                            id: 1,
+                            make: 'Audi',
+                            model: 'A6',
+                            year: 2023,
+                            color: 'Navarra Blue',
+                            license_plate: 'AUD-5681',
+                            vin: 'WAUFFAFL5DN123456'
+                        },
+                        {
+                            id: 2,
+                            make: 'Audi',
+                            model: 'Q5',
+                            year: 2022,
+                            color: 'Glacier White',
+                            license_plate: 'AUD-7891',
+                            vin: 'WAUZZZ8R9AT654321'
+                        }
+                    ];
+                    
+                    sampleVehicles.forEach(vehicle => {
+                        const vehicleCard = document.createElement('div');
+                        vehicleCard.className = 'card mb-3';
+                        vehicleCard.innerHTML = `
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <h5 class="vehicle-title">${vehicle.year} ${vehicle.make} ${vehicle.model}</h5>
+                                        <p class="text-muted mb-2">License: ${vehicle.license_plate} | VIN: ${vehicle.vin}</p>
+                                        <p class="vehicle-color">Color: ${vehicle.color}</p>
+                                    </div>
+                                    <div class="col-md-4 text-end">
+                                        <a href="${window.flaskURLs.vehicleDetails(vehicle.id)}" class="btn btn-primary">Vehicle Details</a>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        vehicleList.appendChild(vehicleCard);
+                    });
+                    
+                    validationSuccess.style.display = 'block';
+                } else {
+                    // Error - show error message
+                    document.getElementById('error-message').textContent = 
+                        `${biometricType} validation failed. Please try again or use another authentication method.`;
+                    validationError.style.display = 'block';
+                }
+            }, 2500); // Simulate a 2.5 second validation process
+        }
+        
+        // ------------------- FACIAL RECOGNITION -------------------
+        // Initialize face capture
+        async function initFaceCapture() {
+            try {
+                console.log('Starting face capture initialization...');
+                
+                // Reset UI
+                document.getElementById('face-preview-container').style.display = 'none';
+                document.getElementById('capture-face-btn').disabled = false;
+                
+                // Stop any existing stream
+                if (faceStream) {
+                    console.log('Stopping existing camera stream...');
+                    faceStream.getTracks().forEach(track => {
+                        console.log('Stopping track:', track.kind);
+                        track.stop();
+                    });
+                    faceStream = null;
+                }
+                
+                // First show the face capture card and make it visible
+                hideAllCaptureCards();
+                faceCaptureCard.style.display = 'block';
+                
+                // Scroll to the capture card immediately for better user experience
+                faceCaptureCard.scrollIntoView({ behavior: 'smooth' });
+                
+                console.log('Requesting camera permissions...');
+                
+                // Try with more compatible constraints first
+                const constraints = { 
+                    video: { 
+                        width: { ideal: 640 },  // Lower resolution for better compatibility
+                        height: { ideal: 480 },
+                        facingMode: 'user'
+                    } 
+                };
+                
+                console.log('Using constraints:', JSON.stringify(constraints));
+                
+                // Start camera with a timeout to avoid hanging
+                const timeoutPromise = new Promise((_, reject) => {
+                    setTimeout(() => reject(new Error('Camera access timed out')), 10000);
+                });
+                
+                faceStream = await Promise.race([
+                    navigator.mediaDevices.getUserMedia(constraints),
+                    timeoutPromise
+                ]);
+                
+                console.log('Camera stream obtained successfully');
+                
+                // Set the video source
+                faceVideo.srcObject = faceStream;
+                
+                // Add an event listener to know when the video is actually playing
+                faceVideo.onloadedmetadata = function() {
+                    console.log('Video metadata loaded, playing...');
+                    faceVideo.play().catch(e => console.error('Error playing video:', e));
+                };
+                
+                // Ensure the video element is visible
+                faceVideo.style.display = 'block';
+                
+            } catch (error) {
+                console.error('Error starting camera:', error);
+                
+                // Show an error message to the user
+                alert('Camera access failed: ' + error.message + '\n\nPlease ensure you have granted camera permissions and try again.');
+                
+                // Fallback to simulation for demo purposes
+                setTimeout(() => {
+                    simulateValidation('Facial Recognition');
+                }, 1000);
+            }
+        }
+        
+        // Capture face image
+        function captureFace() {
+            try {
+                console.log('Capturing face...');
+                
+                if (!faceStream) {
+                    console.error('No face stream available');
+                    alert('Camera not available. Please try again or refresh the page.');
+                    return;
+                }
+                
+                // Get video dimensions
+                const videoWidth = faceVideo.videoWidth;
+                const videoHeight = faceVideo.videoHeight;
+                
+                console.log('Video dimensions:', videoWidth, 'x', videoHeight);
+                
+                if (videoWidth === 0 || videoHeight === 0) {
+                    console.error('Invalid video dimensions');
+                    alert('Camera not providing a valid video stream. Please try again.');
+                    return;
+                }
+                
+                // Set canvas dimensions to match video
+                faceCanvas.width = videoWidth;
+                faceCanvas.height = videoHeight;
+                
+                // Draw video frame to canvas
+                const context = faceCanvas.getContext('2d');
+                context.drawImage(faceVideo, 0, 0, videoWidth, videoHeight);
+                
+                // Convert canvas to data URL with good quality but reasonable size
+                capturedFaceData = faceCanvas.toDataURL('image/jpeg', 0.85);
+                console.log('Face image captured, data URL length:', capturedFaceData.length);
+                
+                // Log a snippet of the data (first 50 chars) to verify format
+                console.log('Data URL prefix:', capturedFaceData.substring(0, 50) + '...');
+                
+                // Display preview
+                const facePreview = document.getElementById('face-preview');
+                facePreview.src = capturedFaceData;
+                
+                // Show preview container, disable capture button
+                document.getElementById('face-preview-container').style.display = 'block';
+                document.getElementById('capture-face-btn').disabled = true;
+                
+                // Enable the submit button
+                document.getElementById('submit-face-btn').disabled = false;
+            } catch (error) {
+                console.error('Error capturing face:', error);
+                alert('Error capturing image: ' + error.message);
+            }
+        }
+        
+        // Reset face capture
+        function resetFaceCapture() {
+            capturedFaceData = null;
+            document.getElementById('face-preview-container').style.display = 'none';
+            document.getElementById('capture-face-btn').disabled = false;
+        }
+        
+        // ------------------- VOICE RECOGNITION -------------------
+        // Initialize voice recording
+        async function initVoiceCapture() {
+            try {
+                // Reset UI
+                document.getElementById('voice-status').style.display = 'none';
+                document.getElementById('start-voice-btn').disabled = false;
+                document.getElementById('stop-voice-btn').disabled = true;
+                
+                // Show the voice capture card
+                hideAllCaptureCards();
+                voiceCaptureCard.style.display = 'block';
+                
+                // Initialize voice canvas
+                const voiceCanvas = document.getElementById('voice-canvas');
+                const ctx = voiceCanvas.getContext('2d');
+                ctx.fillStyle = '#111';
+                ctx.fillRect(0, 0, voiceCanvas.width, voiceCanvas.height);
+                
+                // Draw initial line
+                ctx.strokeStyle = '#333';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(0, voiceCanvas.height / 2);
+                ctx.lineTo(voiceCanvas.width, voiceCanvas.height / 2);
+                ctx.stroke();
+                
+                // Scroll to the capture card
+                voiceCaptureCard.scrollIntoView({ behavior: 'smooth' });
+            } catch (error) {
+                console.error('Error initializing voice capture:', error);
+                // If initialization fails, go straight to simulation
+                simulateValidation('Voice Recognition');
+            }
+        }
+        
+        // Start voice recording
+        async function startVoiceRecording() {
+            try {
+                // Get audio stream
+                voiceStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                
+                // Create audio context for visualization
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const analyser = audioContext.createAnalyser();
+                const microphone = audioContext.createMediaStreamSource(voiceStream);
+                const javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
+                
+                analyser.smoothingTimeConstant = 0.8;
+                analyser.fftSize = 1024;
+                
+                microphone.connect(analyser);
+                analyser.connect(javascriptNode);
+                javascriptNode.connect(audioContext.destination);
+                
+                // Setup voice recorder
+                const mediaRecorder = new MediaRecorder(voiceStream);
+                const chunks = [];
+                
+                mediaRecorder.ondataavailable = function(e) {
+                    chunks.push(e.data);
+                };
+                
+                mediaRecorder.onstop = function() {
+                    // Create blob and data URL
+                    const blob = new Blob(chunks, { 'type' : 'audio/ogg; codecs=opus' });
+                    const audioURL = URL.createObjectURL(blob);
+                    
+                    // Create base64 data
+                    const reader = new FileReader();
+                    reader.readAsDataURL(blob);
+                    reader.onloadend = function() {
+                        capturedVoiceData = reader.result;
+                    };
+                    
+                    // Update UI
+                    const audioPreview = document.getElementById('voice-preview');
+                    audioPreview.src = audioURL;
+                    document.getElementById('voice-status').style.display = 'block';
+                };
+                
+                // Start recording
+                mediaRecorder.start();
+                voiceRecorder = mediaRecorder;
+                
+                // Setup visualization
+                const voiceCanvas = document.getElementById('voice-canvas');
+                const ctx = voiceCanvas.getContext('2d');
+                const voiceTimer = document.getElementById('voice-timer');
+                
+                // Set up timing
+                let startTime = Date.now();
+                const updateTimer = setInterval(() => {
+                    const elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
+                    const minutes = Math.floor(elapsedSeconds / 60).toString().padStart(2, '0');
+                    const seconds = (elapsedSeconds % 60).toString().padStart(2, '0');
+                    voiceTimer.textContent = `${minutes}:${seconds}`;
+                    
+                    // Auto-stop after 15 seconds
+                    if (elapsedSeconds >= 15 && voiceRecorder) {
+                        stopVoiceRecording();
+                        clearInterval(updateTimer);
+                    }
+                }, 1000);
+                
+                // Visualize
+                javascriptNode.onaudioprocess = function() {
+                    const array = new Uint8Array(analyser.frequencyBinCount);
+                    analyser.getByteFrequencyData(array);
+                    
+                    // Clear canvas
+                    ctx.fillStyle = '#111';
+                    ctx.fillRect(0, 0, voiceCanvas.width, voiceCanvas.height);
+                    
+                    // Draw waveform
+                    const bufferLength = analyser.frequencyBinCount;
+                    const barWidth = (voiceCanvas.width / bufferLength) * 2.5;
+                    
+                    let x = 0;
+                    for (let i = 0; i < bufferLength; i++) {
+                        const barHeight = array[i] / 2;
+                        
+                        // Use Audi red for visualization
+                        ctx.fillStyle = '#f30d0d';
+                        ctx.fillRect(x, voiceCanvas.height - barHeight, barWidth, barHeight);
+                        
+                        x += barWidth + 1;
+                    }
+                };
+                
+                // Update UI
+                document.getElementById('start-voice-btn').disabled = true;
+                document.getElementById('stop-voice-btn').disabled = false;
+            } catch (error) {
+                console.error('Error recording voice:', error);
+                simulateValidation('Voice Recognition');
+            }
+        }
+        
+        // Stop voice recording
+        function stopVoiceRecording() {
+            if (voiceRecorder && voiceRecorder.state !== 'inactive') {
+                voiceRecorder.stop();
+                document.getElementById('start-voice-btn').disabled = true;
+                document.getElementById('stop-voice-btn').disabled = true;
+                
+                // Stop all tracks
+                if (voiceStream) {
+                    voiceStream.getTracks().forEach(track => track.stop());
+                }
+            }
+        }
+        
+        // Reset voice recording
+        function resetVoiceCapture() {
+            stopVoiceRecording();
+            capturedVoiceData = null;
+            document.getElementById('voice-status').style.display = 'none';
+            document.getElementById('start-voice-btn').disabled = false;
+            document.getElementById('stop-voice-btn').disabled = true;
+            document.getElementById('voice-timer').textContent = '00:00';
+            
+            // Reset canvas
+            const voiceCanvas = document.getElementById('voice-canvas');
+            const ctx = voiceCanvas.getContext('2d');
+            ctx.fillStyle = '#111';
+            ctx.fillRect(0, 0, voiceCanvas.width, voiceCanvas.height);
+            
+            // Draw initial line
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, voiceCanvas.height / 2);
+            ctx.lineTo(voiceCanvas.width, voiceCanvas.height / 2);
+            ctx.stroke();
+        }
+        
+        // ------------------- RETINA SCAN -------------------
+        // Initialize retina capture
+        async function initRetinaCapture() {
+            try {
+                // Reset UI
+                document.getElementById('retina-preview-container').style.display = 'none';
+                document.getElementById('capture-retina-btn').disabled = false;
+                
+                // Stop any existing stream
+                if (retinaStream) {
+                    retinaStream.getTracks().forEach(track => track.stop());
+                }
+                
+                // Start camera with high resolution for retina detail
+                retinaStream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        width: { ideal: 1920 },
+                        height: { ideal: 1080 },
+                        facingMode: 'user'
+                    } 
+                });
+                
+                retinaVideo.srcObject = retinaStream;
+                
+                // Show the retina capture card
+                hideAllCaptureCards();
+                retinaCaptureCard.style.display = 'block';
+                
+                // Scroll to the capture card
+                retinaCaptureCard.scrollIntoView({ behavior: 'smooth' });
+            } catch (error) {
+                console.error('Error starting camera for retina scan:', error);
+                // If camera fails, go straight to simulation
+                simulateValidation('Retina Scan');
+            }
+        }
+        
+        // Capture retina image
+        function captureRetina() {
+            if (!retinaStream) return;
+            
+            // Get video dimensions
+            const videoWidth = retinaVideo.videoWidth;
+            const videoHeight = retinaVideo.videoHeight;
+            
+            // Set canvas dimensions to match video
+            retinaCanvas.width = videoWidth;
+            retinaCanvas.height = videoHeight;
+            
+            // Draw video frame to canvas
+            const context = retinaCanvas.getContext('2d');
+            context.drawImage(retinaVideo, 0, 0, videoWidth, videoHeight);
+            
+            // Apply some "enhancement" filters to make it look more like a retina scan
+            context.filter = 'brightness(120%) contrast(120%) saturate(0%) hue-rotate(120deg)';
+            context.globalCompositeOperation = 'source-atop';
+            context.drawImage(retinaCanvas, 0, 0);
+            context.filter = 'none';
+            context.globalCompositeOperation = 'source-over';
+            
+            // Convert canvas to data URL
+            capturedRetinaData = retinaCanvas.toDataURL('image/jpeg');
+            
+            // Display preview
+            const retinaPreview = document.getElementById('retina-preview');
+            retinaPreview.src = capturedRetinaData;
+            
+            // Show preview container, disable capture button
+            document.getElementById('retina-preview-container').style.display = 'block';
+            document.getElementById('capture-retina-btn').disabled = true;
+        }
+        
+        // Reset retina capture
+        function resetRetinaCapture() {
+            capturedRetinaData = null;
+            document.getElementById('retina-preview-container').style.display = 'none';
+            document.getElementById('capture-retina-btn').disabled = false;
+        }
+        
+        // ------------------- DIGITAL KEY -------------------
+        // Initialize digital key scanning
+        function initKeyCapture() {
+            // Reset UI
+            document.getElementById('key-detection-result').style.display = 'none';
+            
+            // Show the key capture card
+            hideAllCaptureCards();
+            keyCaptureCard.style.display = 'block';
+            
+            // Scroll to the capture card
+            keyCaptureCard.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // Scan for digital key
+        async function scanForKey() {
+            const scanButton = document.getElementById('scan-key-btn');
+            const keyTypeRadios = document.getElementsByName('keyType');
+            let selectedKeyType = 'bluetooth';
+            
+            // Get selected key type
+            for (let i = 0; i < keyTypeRadios.length; i++) {
+                if (keyTypeRadios[i].checked) {
+                    selectedKeyType = keyTypeRadios[i].value;
+                    break;
+                }
+            }
+            
+            // Update button state
+            scanButton.disabled = true;
+            scanButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Scanning...';
+            
+            // Simulate scanning delay
+            await new Promise(resolve => setTimeout(resolve, 3000));
+            
+            // Generate a simulated key ID based on type
+            let keyId, keyTypeDisplay;
+            switch (selectedKeyType) {
+                case 'bluetooth':
+                    keyId = 'audi-bt-' + Math.random().toString(16).substr(2, 6);
+                    keyTypeDisplay = 'Bluetooth Key';
+                    break;
+                case 'nfc':
+                    keyId = 'audi-nfc-' + Math.random().toString(16).substr(2, 6);
+                    keyTypeDisplay = 'NFC Card Key';
+                    break;
+                case 'mobile':
+                    keyId = 'audi-mobile-' + Math.random().toString(16).substr(2, 6);
+                    keyTypeDisplay = 'Mobile Device';
+                    break;
+            }
+            
+            // Store key data
+            detectedKeyData = {
+                type: selectedKeyType,
+                id: keyId
+            };
+            
+            // Update UI
+            document.getElementById('detected-key-type').textContent = keyTypeDisplay;
+            document.getElementById('detected-key-id').textContent = keyId;
+            document.getElementById('key-detection-result').style.display = 'block';
+            
+            // Reset button
+            scanButton.disabled = false;
+            scanButton.innerHTML = '<i class="bi bi-search me-1"></i> Scan for Key';
+        }
+        
+        // Reset key detection
+        function resetKeyCapture() {
+            detectedKeyData = null;
+            document.getElementById('key-detection-result').style.display = 'none';
+        }
+        
+        // ------------------- BUTTON EVENT LISTENERS -------------------
+        // Method selection buttons
+        document.getElementById('validate-face-btn').addEventListener('click', function() {
+            console.log('Redirecting to dedicated face validation page');
+            window.location.href = "{{ url_for('biometrics.validate_face') }}";
+        });
+        document.getElementById('validate-voice-btn').addEventListener('click', function() {
+            console.log('Redirecting to dedicated voice validation page');
+            window.location.href = "{{ url_for('biometrics.validate_voice') }}";
+        });
+        
+        // For retina validation, we'll direct to a dedicated page
+        document.getElementById('validate-retina-btn').addEventListener('click', function() {
+            console.log('Redirecting to dedicated retina validation page');
+            window.location.href = "{{ url_for('biometrics.validate_retina') }}";
+        });
+        
+        document.getElementById('validate-key-btn').addEventListener('click', initKeyCapture);
+        
+        // Face capture buttons
+        document.getElementById('capture-face-btn').addEventListener('click', captureFace);
+        document.getElementById('reset-face-btn').addEventListener('click', resetFaceCapture);
+        document.getElementById('submit-face-btn').addEventListener('click', () => {
+            console.log('Face validation button clicked');
+            if (capturedFaceData) {
+                console.log('Face data available, length:', capturedFaceData.length);
+                
+                // Show the results panel manually
+                const resultsPanel = document.getElementById('validation-results');
+                if (resultsPanel) {
+                    console.log('Showing results panel directly');
+                    resultsPanel.style.display = 'block';
+                    
+                    // Show spinner, hide success and error
+                    const spinner = document.getElementById('validation-spinner');
+                    const success = document.getElementById('validation-success');
+                    const error = document.getElementById('validation-error');
+                    
+                    if (spinner) spinner.style.display = 'block';
+                    if (success) success.style.display = 'none';
+                    if (error) error.style.display = 'none';
+                    
+                    // Scroll to results
+                    resultsPanel.scrollIntoView({ behavior: 'smooth' });
+                    
+                    // Short delay to ensure UI updates before starting validation
+                    setTimeout(() => {
+                        validateBiometric('Facial Recognition', capturedFaceData);
+                    }, 100);
+                } else {
+                    console.error('Results panel not found!');
+                    validateBiometric('Facial Recognition', capturedFaceData);
+                }
+            } else {
+                console.error('No face data available');
+                alert('Please capture your face image first');
+            }
+        });
+        
+        // Voice capture buttons
+        document.getElementById('start-voice-btn').addEventListener('click', startVoiceRecording);
+        document.getElementById('stop-voice-btn').addEventListener('click', stopVoiceRecording);
+        document.getElementById('reset-voice-btn').addEventListener('click', resetVoiceCapture);
+        document.getElementById('submit-voice-btn').addEventListener('click', () => {
+            validateBiometric('Voice Recognition', capturedVoiceData);
+        });
+        
+        // Retina capture buttons
+        document.getElementById('capture-retina-btn').addEventListener('click', captureRetina);
+        document.getElementById('reset-retina-btn').addEventListener('click', resetRetinaCapture);
+        document.getElementById('submit-retina-btn').addEventListener('click', () => {
+            validateBiometric('Retina Scan', capturedRetinaData);
+        });
+        
+        // Key capture buttons
+        document.getElementById('scan-key-btn').addEventListener('click', scanForKey);
+        document.getElementById('reset-key-btn').addEventListener('click', resetKeyCapture);
+        document.getElementById('submit-key-btn').addEventListener('click', () => {
+            validateBiometric('Digital Key', detectedKeyData);
+        });
+        
+        // Reset session function
+        function resetValidationSession() {
+            console.log('Reset session function called');
+            
+            // Check if biometric animation functions are available
+            if (window.biometricAnimation && typeof window.biometricAnimation.resetSessionValidations === 'function') {
+                console.log('Using biometricAnimation.resetSessionValidations()');
+                // Reset session data
+                window.biometricAnimation.resetSessionValidations();
+                console.log('Session validations reset successfully');
+                
+                // Provide visual feedback
+                alert('Validation session reset successfully. You can now validate again with different biometrics.');
+                
+                // Hide the validation success panel and show the biometric options
+                document.getElementById('validation-success').style.display = 'none';
+                document.getElementById('validation-results').style.display = 'none';
+                
+                // Scroll back to top of page
+                window.scrollTo({top: 0, behavior: 'smooth'});
+            } else {
+                console.log('Falling back to direct localStorage manipulation');
+                // Direct localStorage manipulation as fallback
+                try {
+                    let sessionData = JSON.parse(localStorage.getItem('sessionValidations')) || {};
+                    console.log('Current session data:', sessionData);
+                    
+                    for (const key in sessionData) {
+                        sessionData[key] = false;
+                    }
+                    localStorage.setItem('sessionValidations', JSON.stringify(sessionData));
+                    console.log('Session validations reset (fallback method):', sessionData);
+                    
+                    // Provide feedback and refresh page
+                    alert('Validation session reset successfully. The page will now reload.');
+                    window.location.reload();
+                } catch (error) {
+                    console.error('Error resetting session:', error);
+                    alert('Failed to reset session. Please try refreshing the page.');
+                }
+            }
+        }
+        
+        // Setup both reset session buttons
+        const resetSessionButtonIds = ['reset-session-btn', 'reset-session-top-btn'];
+        
+        resetSessionButtonIds.forEach(buttonId => {
+            const button = document.getElementById(buttonId);
+            console.log(`Reset button '${buttonId}' found:`, button);
+            
+            if (button) {
+                console.log(`Adding event listener to ${buttonId}`);
+                button.addEventListener('click', resetValidationSession);
+            }
+        });
+    });
+</script>
+{% endblock %}

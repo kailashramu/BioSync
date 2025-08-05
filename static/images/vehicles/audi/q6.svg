@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 350" width="800" height="350">
+  <!-- Audi Q6 stylized crossover coupe - white -->
+  <style>
+    .body { fill: #f5f5f5; }
+    .windows { fill: #1e5799; }
+    .lights { fill: #ffcc00; }
+    .grille { fill: #111; }
+    .rings { fill: silver; }
+    .wheels { fill: #333; }
+    .rims { fill: #777; }
+    .shadow { fill: rgba(0,0,0,0.2); }
+    .highlight { fill: #fff; opacity: 0.1; }
+    .details { fill: #ddd; }
+  </style>
+  
+  <!-- Car Shadow -->
+  <ellipse class="shadow" cx="400" cy="310" rx="340" ry="30"/>
+  
+  <!-- Car Body - Q6 Sportback/Coupe style SUV -->
+  <path class="body" d="M150,240 C110,240 100,210 80,190 C50,160 40,210 100,255 L150,270 L650,270 L700,255 C760,210 750,160 720,190 C700,210 690,240 650,240 L150,240 Z"/>
+  <path class="body" d="M150,240 L150,150 L200,110 L470,110 L590,150 L650,150 L650,240 L150,240 Z"/>
+  
+  <!-- Sloping roof for coupe styling -->
+  <path class="body" d="M470,110 L590,150 L540,150 L450,110 Z"/>
+  
+  <!-- Windows (sloping for coupe style) -->
+  <path class="windows" d="M210,170 L240,130 L470,130 L500,150 L580,150 L580,180 L210,180 Z"/>
+  <path class="windows" d="M260,170 L280,140 L450,140 L480,160 L540,160 L260,170 Z"/>
+  
+  <!-- Roof Rails (shorter for coupe style) -->
+  <rect class="details" x="220" y="110" width="230" height="5" rx="2"/>
+  <rect class="details" x="220" y="115" width="10" height="10" rx="2"/>
+  <rect class="details" x="450" y="115" width="10" height="10" rx="2"/>
+  
+  <!-- Front Grille - Audi Signature Single Frame -->
+  <rect class="grille" x="110" y="190" width="90" height="35" rx="5"/>
+  
+  <!-- Audi Rings Logo -->
+  <circle class="rings" cx="155" cy="207" r="6"/>
+  <circle class="rings" cx="169" cy="207" r="6"/>
+  <circle class="rings" cx="141" cy="207" r="6"/>
+  <circle class="rings" cx="127" cy="207" r="6"/>
+  
+  <!-- Headlights - LED Style -->
+  <path class="lights" d="M100,190 L110,190 L110,215 L100,215 Z"/>
+  <rect class="lights" x="200" y="190" width="10" height="25"/>
+  
+  <!-- Wheels -->
+  <circle class="wheels" cx="200" cy="255" r="38"/>
+  <circle class="rims" cx="200" cy="255" r="21"/>
+  <circle class="wheels" cx="600" cy="255" r="38"/>
+  <circle class="rims" cx="600" cy="255" r="21"/>
+  
+  <!-- Body Highlights -->
+  <path class="highlight" d="M150,150 L200,110 L470,110 L590,150 L650,150 L650,155 L150,155 Z"/>
+  
+  <!-- Text Label -->
+  <text x="400" y="330" font-family="Arial, sans-serif" font-size="20" text-anchor="middle" fill="#333">Audi Q6</text>
+</svg>

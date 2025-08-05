@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800px" height="600px" viewBox="0 0 800 600" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Vehicle Placeholder</title>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Car-Icon">
+            <rect id="Background" fill="#F8F9FA" x="0" y="0" width="800" height="600" rx="8"></rect>
+            <g id="Car" transform="translate(200.000000, 150.000000)" fill="#212529" fill-rule="nonzero">
+                <path d="M390,210 C390,221.05 381.05,230 370,230 L360,230 L360,240 C360,245.5 355.5,250 350,250 L330,250 C324.5,250 320,245.5 320,240 L320,230 L80,230 L80,240 C80,245.5 75.5,250 70,250 L50,250 C44.5,250 40,245.5 40,240 L40,230 L30,230 C18.95,230 10,221.05 10,210 L10,170 C10,146.9 28.95,128 52,128 L52,90 C52,52.5 106.9,20 162.5,20 L237.5,20 C293.1,20 348,52.5 348,90 L348,128 C371.05,128 390,146.9 390,170 L390,210 Z M70,200 C81.05,200 90,191.05 90,180 C90,168.95 81.05,160 70,160 C58.95,160 50,168.95 50,180 C50,191.05 58.95,200 70,200 Z M330,200 C341.05,200 350,191.05 350,180 C350,168.95 341.05,160 330,160 C318.95,160 310,168.95 310,180 C310,191.05 318.95,200 330,200 Z M348,120 L348,90 C348,63.5 293.1,40 237.5,40 L162.5,40 C106.9,40 52,63.5 52,90 L52,120 L348,120 Z" id="Shape"></path>
+            </g>
+            <text id="AUDI" font-family="Arial-BoldMT, Arial" font-size="48" font-weight="bold" fill="#CC0000">
+                <tspan x="360" y="400">AUDI</tspan>
+            </text>
+        </g>
+    </g>
+</svg>

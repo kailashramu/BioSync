@@ -1,0 +1,588 @@
+{% extends "layout.html" %}
+
+{% block title %}Face Validation - BioSync{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">FACIAL RECOGNITION VALIDATION</h5>
+                    <div>
+                        <button id="reset-sessions-btn" class="btn btn-sm btn-outline-danger me-2">
+                            <i class="bi bi-arrow-clockwise me-1"></i> Reset Session
+                        </button>
+                        <a href="{{ url_for('biometrics.validate_biometrics') }}" class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i> Back
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Camera Section -->
+                    <div id="camera-section">
+                        <p class="mb-3">Position your face in the camera view and click the capture button.</p>
+                        
+                        <div class="row">
+                            <div class="col-md-8 mx-auto">
+                                <div class="video-container mb-3">
+                                    <video id="face-video" autoplay playsinline style="width: 100%; border-radius: 8px;"></video>
+                                    <canvas id="face-canvas" style="display: none;"></canvas>
+                                </div>
+                                
+                                <div id="face-preview-container" style="display: none;" class="mb-3">
+                                    <div class="alert alert-success">
+                                        <i class="bi bi-check-circle me-2"></i> Image captured successfully
+                                    </div>
+                                    <div class="text-center mb-3">
+                                        <img id="face-preview" class="img-thumbnail" style="max-height: 200px;" alt="Face Preview" />
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex justify-content-center">
+                                    <button id="capture-face-btn" class="btn btn-primary me-2">
+                                        <i class="bi bi-camera me-1"></i> Capture Image
+                                    </button>
+                                    <button id="reset-face-btn" class="btn btn-outline-secondary me-2">
+                                        <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+                                    </button>
+                                    <button id="validate-face-btn" class="btn btn-success" disabled>
+                                        <i class="bi bi-check-circle me-1"></i> Validate Face
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Validation Results Section -->
+                    <div id="results-section" style="display: none;" class="mt-4">
+                        <hr>
+                        <h5 class="mb-3">VALIDATION RESULTS</h5>
+                        
+                        <!-- Loading spinner -->
+                        <div id="validation-spinner" class="text-center">
+                            <div class="spinner-border" role="status">
+                                <span class="visually-hidden">Validating...</span>
+                            </div>
+                            <p class="mt-2">Validating biometric data...</p>
+                        </div>
+                        
+                        <!-- Success result -->
+                        <div id="validation-success" style="display: none;">
+                            <div class="alert alert-success mb-4">
+                                <i class="bi bi-check-circle me-2"></i> Facial recognition successful
+                                <span class="float-end">
+                                    <span class="badge bg-primary" id="confidence-score">0%</span>
+                                </span>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <h6>MATCH CONFIDENCE</h6>
+                                <div class="progress" style="height: 10px;">
+                                    <div class="progress-bar bg-danger" role="progressbar" id="confidence-bar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mt-1">
+                                    <small class="text-muted">Low Confidence</small>
+                                    <small class="text-muted">High Confidence</small>
+                                </div>
+                            </div>
+                            
+                            <h5 class="card-title mb-3">USER INFORMATION</h5>
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <p><strong>User:</strong> <span id="user-name">-</span></p>
+                                    <p><strong>Email:</strong> <span id="user-email">-</span></p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Account Created:</strong> <span id="user-created">-</span></p>
+                                </div>
+                            </div>
+                            
+                            <h5 class="card-title mb-3">ASSOCIATED VEHICLES</h5>
+                            <div id="vehicle-list" class="vehicle-list">
+                                <!-- Vehicle cards will be inserted here -->
+                            </div>
+                        </div>
+                        
+                        <!-- Error result -->
+                        <div id="validation-error" class="alert alert-danger" style="display: none;">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            <span id="error-message">Facial recognition failed. Please try again.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Elements
+    const faceVideo = document.getElementById('face-video');
+    const faceCanvas = document.getElementById('face-canvas');
+    const facePreview = document.getElementById('face-preview');
+    const facePreviewContainer = document.getElementById('face-preview-container');
+    const captureBtn = document.getElementById('capture-face-btn');
+    const resetBtn = document.getElementById('reset-face-btn');
+    const validateBtn = document.getElementById('validate-face-btn');
+    
+    const resultsSection = document.getElementById('results-section');
+    const validationSpinner = document.getElementById('validation-spinner');
+    const validationSuccess = document.getElementById('validation-success');
+    const validationError = document.getElementById('validation-error');
+    
+    // State variables
+    let faceStream = null;
+    let capturedFaceData = null;
+    
+    // Helper function for logging
+    function log(message, ...args) {
+        console.log(`[FACE VALIDATION] ${message}`, ...args);
+    }
+    
+    // Initialize camera
+    async function initCamera() {
+        try {
+            log('Initializing camera...');
+            
+            // Reset UI
+            facePreviewContainer.style.display = 'none';
+            captureBtn.disabled = false;
+            validateBtn.disabled = true;
+            
+            // Stop any existing stream
+            if (faceStream) {
+                faceStream.getTracks().forEach(track => track.stop());
+                faceStream = null;
+            }
+            
+            // Request camera access
+            const constraints = { 
+                video: { 
+                    width: { ideal: 640 },
+                    height: { ideal: 480 },
+                    facingMode: 'user'
+                } 
+            };
+            
+            faceStream = await navigator.mediaDevices.getUserMedia(constraints);
+            log('Camera access granted');
+            
+            // Set video source
+            faceVideo.srcObject = faceStream;
+            faceVideo.play();
+            
+        } catch (error) {
+            log('Camera initialization error:', error);
+            alert(`Camera access failed: ${error.message}. Please ensure you've granted camera permissions and try again.`);
+        }
+    }
+    
+    // Capture face image
+    function captureFace() {
+        try {
+            log('Capturing face image');
+            
+            if (!faceStream) {
+                throw new Error('Camera not initialized');
+            }
+            
+            // Get video dimensions
+            const width = faceVideo.videoWidth;
+            const height = faceVideo.videoHeight;
+            
+            if (width === 0 || height === 0) {
+                throw new Error('Invalid video dimensions');
+            }
+            
+            // Draw video to canvas
+            faceCanvas.width = width;
+            faceCanvas.height = height;
+            const ctx = faceCanvas.getContext('2d');
+            ctx.drawImage(faceVideo, 0, 0, width, height);
+            
+            // Get image data
+            capturedFaceData = faceCanvas.toDataURL('image/jpeg', 0.85);
+            
+            // Show preview
+            facePreview.src = capturedFaceData;
+            facePreviewContainer.style.display = 'block';
+            
+            // Update buttons
+            captureBtn.disabled = true;
+            validateBtn.disabled = false;
+            
+            log('Face image captured successfully');
+            
+        } catch (error) {
+            log('Error capturing face:', error);
+            alert(`Failed to capture image: ${error.message}`);
+        }
+    }
+    
+    // Reset face capture
+    function resetCapture() {
+        log('Resetting face capture');
+        capturedFaceData = null;
+        facePreviewContainer.style.display = 'none';
+        captureBtn.disabled = false;
+        validateBtn.disabled = true;
+    }
+    
+    // Validate face
+    async function validateFace() {
+        try {
+            log('Starting face validation');
+            
+            if (!capturedFaceData) {
+                throw new Error('No face image captured');
+            }
+            
+            // Show results section with spinner
+            resultsSection.style.display = 'block';
+            validationSpinner.style.display = 'block';
+            validationSuccess.style.display = 'none';
+            validationError.style.display = 'none';
+            
+            // Scroll to results
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
+            
+            // Check if we have a previous voice validation
+            const validatedBiometrics = JSON.parse(localStorage.getItem('validatedBiometrics') || '{"face":false,"voice":false,"retina":false,"proximity":false}');
+            const validatedUserIds = JSON.parse(localStorage.getItem('validatedUserIds') || '{"face":null,"voice":null,"retina":null,"proximity":null}');
+            const hasVoiceValidation = validatedBiometrics && validatedBiometrics.voice === true;
+            const previousUserId = hasVoiceValidation ? validatedUserIds.voice : null;
+            
+            if (hasVoiceValidation) {
+                log('Previous voice validation detected with user ID: ' + previousUserId);
+            }
+            
+            // Prepare API request with security data
+            const url = '/biometrics/api/validate/face';
+            const payload = {
+                biometric_data: capturedFaceData,
+                is_second_validation: hasVoiceValidation,
+                previous_user_id: previousUserId
+            };
+            
+            // Call API
+            log('Sending validation request to API with security check');
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                },
+                body: JSON.stringify(payload)
+            });
+            
+            // Process response - all server responses are considered valid now (even errors)
+            // since we return proper JSON with success:false for failed validations
+            
+            const result = await response.json();
+            log('Received validation response:', result);
+            
+            // Hide spinner
+            validationSpinner.style.display = 'none';
+            
+            // Check for security violations first (highest priority)
+            if (result.security_violation) {
+                log('SECURITY ALERT: Biometric validation detected different users');
+                
+                // Show a security alert
+                validationSuccess.style.display = 'block';
+                validationSuccess.innerHTML = `
+                    <div class="alert alert-danger">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-exclamation-triangle-fill me-3 fs-4"></i>
+                            <div>
+                                <h5 class="mb-1">Security Alert: User Mismatch Detected</h5>
+                                <p class="mb-2">The face validation does not match the previously validated voice. 
+                                These biometrics appear to belong to different users.</p>
+                                <div class="mb-2">
+                                    <span class="badge bg-danger">Vehicle Access Denied</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="alert alert-info mt-3">
+                        <div class="d-flex align-items-center">
+                            <div class="spinner-border spinner-border-sm me-2" role="status">
+                                <span class="visually-hidden">Redirecting...</span>
+                            </div>
+                            <div>Redirecting to home page for security reasons...</div>
+                        </div>
+                    </div>
+                `;
+                
+                // Reset all biometric validations for security
+                try {
+                    if (window.biometricAnimation) {
+                        if (typeof window.biometricAnimation.resetBiometricValidations === 'function') {
+                            window.biometricAnimation.resetBiometricValidations();
+                        }
+                        if (typeof window.biometricAnimation.resetSessionValidations === 'function') {
+                            window.biometricAnimation.resetSessionValidations();
+                        }
+                        log('Reset all validations due to security mismatch');
+                    }
+                } catch (error) {
+                    log('Error resetting validations: ' + error);
+                }
+                
+                // Redirect to home page with security alert after a short delay
+                setTimeout(() => {
+                    window.location.href = result.redirect || '/?security_alert=1';
+                }, 2500);
+                
+                return; // Exit early to prevent further processing
+            }
+            // Process normal success result
+            else if (result.success) {
+                // Store the validated user data globally for the animation to use
+                window.validatedUserData = result;
+                
+                // Also store in localStorage for persistence
+                try {
+                    localStorage.setItem('validatedUserData', JSON.stringify(result));
+                    console.log('Saved validation data to localStorage');
+                } catch (e) {
+                    console.error('Failed to save validation data to localStorage:', e);
+                }
+                
+                // Show user info
+                document.getElementById('user-name').textContent = result.user.name || 'Unknown';
+                document.getElementById('user-email').textContent = result.user.email || 'Not provided';
+                document.getElementById('user-created').textContent = result.user.created_at || 'Unknown';
+                
+                // Update confidence score
+                const confidencePercent = Math.round((result.confidence || 0) * 100);
+                document.getElementById('confidence-score').textContent = `${confidencePercent}%`;
+                
+                // Update progress bar
+                const confidenceBar = document.getElementById('confidence-bar');
+                confidenceBar.style.width = `${confidencePercent}%`;
+                confidenceBar.setAttribute('aria-valuenow', confidencePercent);
+                
+                // Set progress bar color
+                if (confidencePercent >= 90) {
+                    confidenceBar.className = 'progress-bar bg-success';
+                } else if (confidencePercent >= 75) {
+                    confidenceBar.className = 'progress-bar bg-info';
+                } else if (confidencePercent >= 60) {
+                    confidenceBar.className = 'progress-bar bg-warning';
+                } else {
+                    confidenceBar.className = 'progress-bar bg-danger';
+                }
+                
+                // Set face as validated in both localStorage systems
+                const validatedBiometrics = JSON.parse(localStorage.getItem('validatedBiometrics') || '{"face":false,"voice":false,"retina":false,"proximity":false}');
+                const sessionValidations = JSON.parse(localStorage.getItem('sessionValidations') || '{"face":false,"voice":false,"retina":false,"proximity":false}');
+                
+                validatedBiometrics.face = true;
+                sessionValidations.face = true;
+                
+                localStorage.setItem('validatedBiometrics', JSON.stringify(validatedBiometrics));
+                localStorage.setItem('sessionValidations', JSON.stringify(sessionValidations));
+                console.log('Updated face validation in localStorage - validatedBiometrics and sessionValidations');
+                
+                // Register this biometric as valid in the animation system
+                if (window.biometricAnimation) {
+                    // Pass the user ID as the third parameter to track which user this biometric belongs to
+                    const userId = result.user && result.user.id ? result.user.id : null;
+                    window.biometricAnimation.setBiometricValidated('face', true, userId);
+                    window.biometricAnimation.setSessionValidation('face', true);
+                    console.log('Registered face validation in biometric animation system');
+                    
+                    // If this is the only biometric validated so far, show a hint
+                    const validatedTypes = Object.keys(window.biometricAnimation.getValidatedBiometrics())
+                        .filter(key => window.biometricAnimation.isValidated(key));
+                    
+                    if (validatedTypes.length === 1) {
+                        const hintEl = document.createElement('div');
+                        hintEl.className = 'alert alert-info mt-3 animation-hint';
+                        hintEl.innerHTML = `
+                            <i class="bi bi-info-circle me-2"></i>
+                            <strong>Hint:</strong> Validate another biometric type to see the car door animation!
+                        `;
+                        document.getElementById('validation-success').appendChild(hintEl);
+                        setTimeout(() => {
+                            if (hintEl.parentNode) {
+                                hintEl.classList.add('fade-out');
+                                setTimeout(() => hintEl.remove(), 500);
+                            }
+                        }, 6000);
+                    }
+                }
+                
+                // Display vehicles
+                const vehicleList = document.getElementById('vehicle-list');
+                vehicleList.innerHTML = '';
+                
+                if (result.vehicles && result.vehicles.length > 0) {
+                    result.vehicles.forEach(vehicle => {
+                        const vehicleCard = document.createElement('div');
+                        vehicleCard.className = 'card mb-3';
+                        vehicleCard.innerHTML = `
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <h5 class="vehicle-title">${vehicle.year} ${vehicle.make} ${vehicle.model}</h5>
+                                        <p class="text-muted mb-2">License: ${vehicle.license_plate || 'N/A'} | VIN: ${vehicle.vin || 'N/A'}</p>
+                                        <p class="vehicle-color">Color: ${vehicle.color || 'N/A'}</p>
+                                    </div>
+                                    <div class="col-md-4 text-end">
+                                        <a href="/vehicles/details/${vehicle.id}?from=face_validation" class="btn btn-primary" onclick="
+                                        // Mark face as validated in local storage before navigating
+                                        const validatedBiometrics = JSON.parse(localStorage.getItem('validatedBiometrics') || '{"face":false,"voice":false,"retina":false,"proximity":false}');
+                                        const sessionValidations = JSON.parse(localStorage.getItem('sessionValidations') || '{"face":false,"voice":false,"retina":false,"proximity":false}');
+                                        
+                                        validatedBiometrics.face = true;
+                                        sessionValidations.face = true;
+                                        
+                                        localStorage.setItem('validatedBiometrics', JSON.stringify(validatedBiometrics));
+                                        localStorage.setItem('sessionValidations', JSON.stringify(sessionValidations));
+                                        
+                                        // Also register in biometric animation if available
+                                        if (window.biometricAnimation) {
+                                            // Use the user ID from the validation result
+                                            const userId = ${vehicle.user_id || 'null'};
+                                            window.biometricAnimation.setBiometricValidated('face', true, userId);
+                                            window.biometricAnimation.setSessionValidation('face', true);
+                                        }
+                                        
+                                        console.log('Face validation marked as completed before navigation');
+                                        ">Vehicle Details</a>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        vehicleList.appendChild(vehicleCard);
+                    });
+                } else {
+                    vehicleList.innerHTML = `
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            No vehicles found for this user.
+                        </div>
+                    `;
+                }
+                
+                // Show success panel
+                validationSuccess.style.display = 'block';
+                log('Validation successful');
+                
+                // Trigger micro-animation for success with enhanced visibility
+                setTimeout(() => {
+                    try {
+                        log('Preparing to play face validation success micro-animation');
+                        
+                        // Find a suitable element to animate - try different selectors
+                        let elementToAnimate;
+                        
+                        // First try the dedicated icon if it exists
+                        elementToAnimate = document.querySelector('.bi-person-badge-fill');
+                        
+                        // If no icon found, try the success panel or create a new visual element
+                        if (!elementToAnimate) {
+                            // Check if we should create a new visual element for better animation visibility
+                            const animationContainer = document.createElement('div');
+                            animationContainer.className = 'animation-container';
+                            animationContainer.innerHTML = `
+                                <div class="success-icon" style="font-size: 48px; color: #28a745; text-align: center;">
+                                    <i class="bi bi-person-badge-fill"></i>
+                                </div>
+                            `;
+                            
+                            // Insert the new element at the top of the success panel
+                            validationSuccess.insertBefore(animationContainer, validationSuccess.firstChild);
+                            elementToAnimate = animationContainer.querySelector('.success-icon');
+                        }
+                        
+                        // Get the animation API
+                        const animationApi = 
+                            (window.microAnimations) ? window.microAnimations : 
+                            (window.biometricAnimation && window.biometricAnimation.microAnimations) ? 
+                                window.biometricAnimation.microAnimations : null;
+                        
+                        if (animationApi && elementToAnimate) {
+                            log('Playing face validation success micro-animation');
+                            animationApi.playSuccessAnimation('face', elementToAnimate);
+                        } else {
+                            log('Animation API or target element not available');
+                            // Fallback - simple CSS animation
+                            if (elementToAnimate) {
+                                elementToAnimate.style.animation = 'pulse 0.5s ease-in-out 2';
+                            }
+                        }
+                    } catch (error) {
+                        log('Error playing micro-animation:', error);
+                    }
+                }, 300); // Small delay for better visual effect
+                
+            } else {
+                // Show error
+                document.getElementById('error-message').textContent = result.error || 'Facial recognition failed. Please try again.';
+                validationError.style.display = 'block';
+                log('Validation failed:', result.error);
+            }
+            
+        } catch (error) {
+            log('Validation error:', error);
+            validationSpinner.style.display = 'none';
+            document.getElementById('error-message').textContent = `Error: ${error.message}`;
+            validationError.style.display = 'block';
+        }
+    }
+    
+    // Initialize camera on page load
+    initCamera();
+    
+    // Event listeners
+    captureBtn.addEventListener('click', captureFace);
+    resetBtn.addEventListener('click', resetCapture);
+    validateBtn.addEventListener('click', validateFace);
+});
+</script>
+
+<style>
+    /* Fallback animation for when micro-animations.js fails */
+    @keyframes pulse {
+        0% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.1); opacity: 0.8; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+    
+    .success-icon {
+        display: inline-block;
+        padding: 15px;
+        border-radius: 50%;
+        margin-bottom: 15px;
+        position: relative;
+    }
+    
+    .success-badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background-color: #28a745;
+        color: white;
+        border-radius: 50%;
+        width: 25px;
+        height: 25px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        animation: fadeIn 0.3s ease-in;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: scale(0.5); }
+        to { opacity: 1; transform: scale(1); }
+    }
+</style>
+{% endblock %}

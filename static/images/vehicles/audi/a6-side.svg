@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 350" width="800" height="350">
+  <!-- Audi A6 side view - black -->
+  <style>
+    .body { fill: #222; }
+    .windows { fill: #1e5799; }
+    .lights { fill: #ffcc00; }
+    .wheels { fill: #333; }
+    .rims { fill: #777; }
+    .shadow { fill: rgba(0,0,0,0.2); }
+    .highlight { fill: #fff; opacity: 0.1; }
+    .details { fill: #444; }
+  </style>
+  
+  <!-- Car Shadow -->
+  <ellipse class="shadow" cx="400" cy="310" rx="350" ry="30"/>
+  
+  <!-- Car Body - A6 Sedan Side View -->
+  <path class="body" d="M100,230 L150,230 L180,180 L600,180 L650,210 L700,230 L700,260 L100,260 Z"/>
+  <path class="body" d="M180,180 L220,140 L560,140 L600,180 Z"/>
+  
+  <!-- Windows -->
+  <path class="windows" d="M230,180 L250,150 L380,150 L400,180 Z"/>
+  <path class="windows" d="M420,180 L440,150 L530,150 L550,180 Z"/>
+  
+  <!-- Door Lines -->
+  <line class="details" x1="400" y1="180" x2="400" y2="260" stroke-width="2" stroke="#444"/>
+  <circle class="details" cx="390" cy="220" r="5"/>
+  <circle class="details" cx="590" cy="220" r="5"/>
+  
+  <!-- Wheels -->
+  <circle class="wheels" cx="200" cy="260" r="40"/>
+  <circle class="rims" cx="200" cy="260" r="22"/>
+  <circle class="wheels" cx="600" cy="260" r="40"/>
+  <circle class="rims" cx="600" cy="260" r="22"/>
+  
+  <!-- Headlight and Taillight -->
+  <path class="lights" d="M150,210 L160,210 L160,230 L150,230 Z"/>
+  <path class="lights" d="M670,210 L680,210 L680,230 L670,230 Z"/>
+  
+  <!-- Body Highlights -->
+  <path class="highlight" d="M180,180 L220,140 L560,140 L600,180 L550,180 L250,180 Z"/>
+  
+  <!-- Text Label -->
+  <text x="400" y="330" font-family="Arial, sans-serif" font-size="20" text-anchor="middle" fill="#333">Audi A6 - Side View</text>
+</svg>

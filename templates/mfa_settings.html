@@ -1,0 +1,294 @@
+{% extends 'layout.html' %}
+
+{% block title %}Multi-Factor Authentication Settings{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-3">
+            <!-- Profile sidebar -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Account Settings</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="{{ url_for('profile.dashboard') }}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-speedometer2 me-2"></i> Dashboard
+                    </a>
+                    <a href="{{ url_for('profile.edit_profile') }}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-person me-2"></i> Profile
+                    </a>
+                    <a href="{{ url_for('vehicle.list_vehicles') }}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-car-front me-2"></i> My Vehicles
+                    </a>
+                    <a href="{{ url_for('auth.mfa_settings') }}" class="list-group-item list-group-item-action active">
+                        <i class="bi bi-shield-lock me-2"></i> Multi-Factor Auth
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Biometric status card -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Biometric Status</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="bi bi-person-badge me-2"></i> Face
+                        </div>
+                        {% if 'face' in available_biometrics %}
+                        <span class="badge bg-success rounded-pill">Set Up</span>
+                        {% else %}
+                        <span class="badge bg-secondary rounded-pill">Not Set Up</span>
+                        {% endif %}
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="bi bi-mic me-2"></i> Voice
+                        </div>
+                        {% if 'voice' in available_biometrics %}
+                        <span class="badge bg-success rounded-pill">Set Up</span>
+                        {% else %}
+                        <span class="badge bg-secondary rounded-pill">Not Set Up</span>
+                        {% endif %}
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="bi bi-eye me-2"></i> Retina
+                        </div>
+                        {% if 'retina' in available_biometrics %}
+                        <span class="badge bg-success rounded-pill">Set Up</span>
+                        {% else %}
+                        <span class="badge bg-secondary rounded-pill">Not Set Up</span>
+                        {% endif %}
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="bi bi-bluetooth me-2"></i> Proximity
+                        </div>
+                        {% if 'proximity' in available_biometrics %}
+                        <span class="badge bg-success rounded-pill">Set Up</span>
+                        {% else %}
+                        <span class="badge bg-secondary rounded-pill">Not Set Up</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-9">
+            <!-- MFA settings card -->
+            <div class="card mb-4">
+                <div class="card-header bg-dark text-white d-flex align-items-center">
+                    <i class="bi bi-shield-lock fs-4 me-2"></i>
+                    <h4 class="mb-0">Multi-Factor Authentication</h4>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <p>Multi-factor authentication adds an extra layer of security to your account by requiring a biometric verification in addition to your password when you log in.</p>
+                        
+                        <div class="alert alert-info">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-info-circle fs-4 me-3"></i>
+                                <div>
+                                    <strong>How it works:</strong> After entering your password, you'll be asked to verify your identity using one of your registered biometric methods.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title">MFA Status</h5>
+                            <p class="card-text">
+                                {% if user.mfa_enabled %}
+                                <span class="badge bg-success me-2">Enabled</span> Multi-factor authentication is currently active.
+                                {% else %}
+                                <span class="badge bg-secondary me-2">Disabled</span> Multi-factor authentication is currently inactive.
+                                {% endif %}
+                            </p>
+                            
+                            {% if user.mfa_enabled and user.mfa_required %}
+                            <p class="card-text">
+                                <span class="badge bg-primary me-2">Required</span> MFA is required for every login.
+                            </p>
+                            {% endif %}
+                            
+                            {% if user.mfa_preferred_method %}
+                            <p class="card-text">
+                                <strong>Preferred method:</strong> 
+                                {% if user.mfa_preferred_method == 'face' %}
+                                <i class="bi bi-person-badge me-1"></i> Facial Recognition
+                                {% elif user.mfa_preferred_method == 'voice' %}
+                                <i class="bi bi-mic me-1"></i> Voice Recognition
+                                {% elif user.mfa_preferred_method == 'retina' %}
+                                <i class="bi bi-eye me-1"></i> Retina Scan
+                                {% elif user.mfa_preferred_method == 'proximity' %}
+                                <i class="bi bi-bluetooth me-1"></i> Proximity Key
+                                {% endif %}
+                            </p>
+                            {% endif %}
+                            
+                            {% if user.last_mfa_auth %}
+                            <p class="card-text">
+                                <strong>Last MFA verification:</strong> {{ user.last_mfa_auth.strftime('%Y-%m-%d %H:%M:%S') }}
+                            </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    {% if not available_biometrics %}
+                    <div class="alert alert-warning">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-exclamation-triangle fs-4 me-3"></i>
+                            <div>
+                                <strong>No biometrics set up!</strong> You need to set up at least one biometric method before you can enable multi-factor authentication.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title">Set Up Biometrics</h5>
+                            <p class="card-text">Please set up at least one biometric verification method:</p>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <a href="{{ url_for('biometrics.face_capture') }}" class="btn btn-primary w-100">
+                                        <i class="bi bi-person-badge me-2"></i> Set Up Face Recognition
+                                    </a>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <a href="{{ url_for('biometrics.voice_capture') }}" class="btn btn-primary w-100">
+                                        <i class="bi bi-mic me-2"></i> Set Up Voice Recognition
+                                    </a>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <a href="{{ url_for('biometrics.retina_capture') }}" class="btn btn-primary w-100">
+                                        <i class="bi bi-eye me-2"></i> Set Up Retina Scan
+                                    </a>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <a href="{{ url_for('biometrics.proximity_setup') }}" class="btn btn-primary w-100">
+                                        <i class="bi bi-bluetooth me-2"></i> Set Up Proximity Key
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    
+                    {% if not user.mfa_enabled %}
+                    <!-- Enable MFA form -->
+                    <form method="POST" action="{{ url_for('auth.mfa_settings') }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="action" value="enable_mfa">
+                        
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h5 class="card-title">Enable Multi-Factor Authentication</h5>
+                                
+                                <div class="mb-3">
+                                    <label for="preferred_method" class="form-label">Preferred Verification Method</label>
+                                    <select class="form-select" id="preferred_method" name="preferred_method" required>
+                                        {% if 'face' in available_biometrics %}
+                                        <option value="face">Facial Recognition</option>
+                                        {% endif %}
+                                        
+                                        {% if 'voice' in available_biometrics %}
+                                        <option value="voice">Voice Recognition</option>
+                                        {% endif %}
+                                        
+                                        {% if 'retina' in available_biometrics %}
+                                        <option value="retina">Retina Scan</option>
+                                        {% endif %}
+                                        
+                                        {% if 'proximity' in available_biometrics %}
+                                        <option value="proximity">Proximity Key</option>
+                                        {% endif %}
+                                    </select>
+                                    <div class="form-text">This biometric method will be used by default for verification.</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="require_mfa" name="require_mfa">
+                                        <label class="form-check-label" for="require_mfa">Require MFA for every login</label>
+                                    </div>
+                                    <div class="form-text">If enabled, you'll need to complete biometric verification every time you log in.</div>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-success">
+                                    <i class="bi bi-shield-check me-2"></i> Enable Multi-Factor Authentication
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                    {% else %}
+                    <!-- Disable MFA form -->
+                    <form method="POST" action="{{ url_for('auth.mfa_settings') }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="action" value="disable_mfa">
+                        
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h5 class="card-title">Disable Multi-Factor Authentication</h5>
+                                <p class="card-text text-danger">Warning: Disabling multi-factor authentication will reduce the security of your account.</p>
+                                
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="bi bi-shield-x me-2"></i> Disable Multi-Factor Authentication
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                    {% endif %}
+                    
+                    <!-- Setup additional biometrics -->
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Add More Biometric Methods</h5>
+                            <p class="card-text">Setting up multiple biometric methods gives you more options for verification.</p>
+                            
+                            <div class="row">
+                                {% if 'face' not in available_biometrics %}
+                                <div class="col-md-6 mb-3">
+                                    <a href="{{ url_for('biometrics.face_capture') }}" class="btn btn-outline-primary w-100">
+                                        <i class="bi bi-person-badge me-2"></i> Set Up Face Recognition
+                                    </a>
+                                </div>
+                                {% endif %}
+                                
+                                {% if 'voice' not in available_biometrics %}
+                                <div class="col-md-6 mb-3">
+                                    <a href="{{ url_for('biometrics.voice_capture') }}" class="btn btn-outline-primary w-100">
+                                        <i class="bi bi-mic me-2"></i> Set Up Voice Recognition
+                                    </a>
+                                </div>
+                                {% endif %}
+                                
+                                {% if 'retina' not in available_biometrics %}
+                                <div class="col-md-6 mb-3">
+                                    <a href="{{ url_for('biometrics.retina_capture') }}" class="btn btn-outline-primary w-100">
+                                        <i class="bi bi-eye me-2"></i> Set Up Retina Scan
+                                    </a>
+                                </div>
+                                {% endif %}
+                                
+                                {% if 'proximity' not in available_biometrics %}
+                                <div class="col-md-6 mb-3">
+                                    <a href="{{ url_for('biometrics.proximity_setup') }}" class="btn btn-outline-primary w-100">
+                                        <i class="bi bi-bluetooth me-2"></i> Set Up Proximity Key
+                                    </a>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

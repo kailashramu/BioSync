@@ -1,0 +1,769 @@
+{% extends "layout.html" %}
+
+{% block title %}Retina Validation{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">RETINA SCAN VALIDATION</h5>
+                    <div>
+                        <button id="reset-sessions-btn" class="btn btn-sm btn-outline-danger me-2">
+                            <i class="bi bi-arrow-clockwise me-1"></i> Reset Session
+                        </button>
+                        <a href="{{ url_for('biometrics.validate_biometrics') }}" class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i> Back
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Retina Capture Section -->
+                    <div id="scanner-section">
+                        <p class="mb-3">Position your eye to capture a retina scan.</p>
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            Please look directly at the camera and keep your eye open.
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-8 mx-auto">
+                                <div class="retina-capture-container position-relative">
+                                    <!-- Video for retina capture -->
+                                    <video id="retina-video" class="w-100 rounded-3" style="max-height: 400px;"></video>
+                                    
+                                    <!-- Overlay for retina scan target -->
+                                    <canvas id="retina-overlay" class="position-absolute top-0 start-0 w-100 h-100"></canvas>
+                                    
+                                    <!-- Canvas for capturing still retina image -->
+                                    <canvas id="retina-canvas" class="d-none"></canvas>
+                                </div>
+                                
+                                <div class="captured-retina-container mt-3 text-center d-none">
+                                    <h6 class="mb-2">Captured Retina Image</h6>
+                                    <div class="border rounded-3 p-2">
+                                        <img id="captured-retina" class="img-fluid" style="max-height: 200px;" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-8 mx-auto">
+                                <div class="d-flex justify-content-center gap-2">
+                                    <button id="capture-btn" class="btn btn-primary">
+                                        <i class="bi bi-camera me-1"></i> Capture Retina
+                                    </button>
+                                    <button id="reset-btn" class="btn btn-outline-secondary d-none">
+                                        <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Validation Button -->
+                    <div class="row mb-4">
+                        <div class="col-md-8 mx-auto">
+                            <button id="validate-btn" class="btn btn-success w-100 mb-3 d-none">
+                                <i class="bi bi-check-circle me-1"></i> Validate Retina
+                            </button>
+                            
+                            <div class="text-center">
+                                <a href="{{ url_for('biometrics.validate_biometrics') }}" class="btn btn-link">
+                                    <i class="bi bi-arrow-left me-1"></i> Back to All Biometric Options
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Validation Results Section -->
+            <div id="validation-results" class="mt-4 d-none">
+                <!-- Spinner for loading -->
+                <div id="validation-spinner" class="text-center my-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Validating retina scan...</p>
+                </div>
+                
+                <!-- Success panel -->
+                <div id="validation-success" class="d-none">
+                    <div class="card mb-4">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0">Retina Validation Successful</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-4">
+                                <div class="col-md-8">
+                                    <h5 id="user-name" class="mb-3"></h5>
+                                    <p id="user-email" class="text-muted"></p>
+                                    
+                                    <div class="mt-4">
+                                        <h6>Confidence Score</h6>
+                                        <div class="progress">
+                                            <div id="confidence-bar" class="progress-bar bg-success" role="progressbar" style="width: 0%"></div>
+                                        </div>
+                                        <p class="mt-1 text-end"><span id="confidence-score">0</span>% match</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 text-center">
+                                    <div class="display-1 text-success mb-2">
+                                        <i class="bi bi-check-circle"></i>
+                                    </div>
+                                    <p class="text-success">Identity Verified</p>
+                                </div>
+                            </div>
+                            
+                            <hr>
+                            
+                            <h5 class="mb-3">Associated Vehicles</h5>
+                            <div id="vehicle-list" class="vehicle-grid"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Error panel -->
+                <div id="validation-error" class="d-none">
+                    <div class="card border-danger mb-4">
+                        <div class="card-header bg-danger text-white">
+                            <h5 class="mb-0"><i class="bi bi-exclamation-triangle-fill me-2"></i> Retina Validation Failed</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="text-center mb-4">
+                                <div class="display-1 text-danger mb-3">
+                                    <i class="bi bi-x-circle"></i>
+                                </div>
+                                <h5 id="error-message" class="text-danger">No matching retina pattern found.</h5>
+                                
+                                <div class="alert alert-info mt-4">
+                                    <div class="d-flex">
+                                        <div class="me-3">
+                                            <i class="bi bi-info-circle-fill fs-3"></i>
+                                        </div>
+                                        <div class="text-start">
+                                            <p class="mb-1"><strong>Why this might happen:</strong></p>
+                                            <ul class="mb-0">
+                                                <li>You haven't enrolled your retina pattern in the system</li>
+                                                <li>Poor lighting or camera position during the scan</li>
+                                                <li>The retina scan wasn't focused properly</li>
+                                                <li>Your account may be using a different biometric type</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <p class="text-muted mt-3">Please try again or use another authentication method.</p>
+                            </div>
+                            
+                            <div class="d-grid gap-2 col-md-6 mx-auto">
+                                <a href="{{ url_for('biometrics.validate_retina') }}" class="btn btn-outline-primary">
+                                    <i class="bi bi-arrow-repeat me-1"></i> Try Again
+                                </a>
+                                <a href="{{ url_for('biometrics.validate_biometrics') }}" class="btn btn-outline-secondary">
+                                    <i class="bi bi-grid me-1"></i> Other Biometric Methods
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Elements
+    const video = document.getElementById('retina-video');
+    const canvas = document.getElementById('retina-canvas');
+    const overlay = document.getElementById('retina-overlay');
+    const capturedRetina = document.getElementById('captured-retina');
+    const captureBtn = document.getElementById('capture-btn');
+    const resetBtn = document.getElementById('reset-btn');
+    const validateBtn = document.getElementById('validate-btn');
+    const resetSessionsBtn = document.getElementById('reset-sessions-btn');
+    const capturedContainer = document.querySelector('.captured-retina-container');
+    
+    // Validation elements
+    const validationResults = document.getElementById('validation-results');
+    const validationSpinner = document.getElementById('validation-spinner');
+    const validationSuccess = document.getElementById('validation-success');
+    const validationError = document.getElementById('validation-error');
+    const vehicleList = document.getElementById('vehicle-list');
+    
+    // Global variables
+    let retinaData = null;
+    let stream = null;
+    
+    // Logging helper
+    function log(...args) {
+        console.log('[RETINA VALIDATION]', ...args);
+    }
+    
+    // Initialize camera
+    async function initCamera() {
+        try {
+            log('Initializing camera...');
+            
+            // Request camera permissions with special constraints for clear retina capture
+            stream = await navigator.mediaDevices.getUserMedia({
+                video: {
+                    width: { ideal: 640 },
+                    height: { ideal: 480 },
+                    facingMode: 'user',
+                    // Try to get high-res images
+                    advanced: [
+                        { zoom: 2 },
+                        { whiteBalanceMode: 'manual' },
+                        { exposureMode: 'manual' },
+                        { focusMode: 'continuous' }
+                    ]
+                }
+            });
+            
+            video.srcObject = stream;
+            video.onloadedmetadata = () => {
+                log('Camera access granted');
+                video.play();
+                resetRetinaCapture();
+                drawRetinaOverlay();
+            };
+            
+            // Handle video resize to adjust overlay
+            video.addEventListener('resize', drawRetinaOverlay);
+            window.addEventListener('resize', drawRetinaOverlay);
+            
+        } catch (err) {
+            log('Error initializing camera:', err);
+            alert('Error accessing camera: ' + err.message);
+        }
+    }
+    
+    // Draw the retina scan target overlay
+    function drawRetinaOverlay() {
+        if (!video.videoWidth) return;
+        
+        // Set canvas dimensions to match video
+        overlay.width = video.videoWidth;
+        overlay.height = video.videoHeight;
+        
+        const ctx = overlay.getContext('2d');
+        ctx.clearRect(0, 0, overlay.width, overlay.height);
+        
+        // Draw targeting elements
+        const centerX = overlay.width / 2;
+        const centerY = overlay.height / 2;
+        const radius = Math.min(overlay.width, overlay.height) * 0.2;
+        
+        // Outer circle
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        
+        // Inner circle
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius * 0.7, 0, 2 * Math.PI);
+        ctx.strokeStyle = 'rgba(255, 0, 0, 0.6)';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        
+        // Crosshair
+        ctx.beginPath();
+        ctx.moveTo(centerX - radius * 1.2, centerY);
+        ctx.lineTo(centerX + radius * 1.2, centerY);
+        ctx.moveTo(centerX, centerY - radius * 1.2);
+        ctx.lineTo(centerX, centerY + radius * 1.2);
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        
+        // Instruction text
+        ctx.font = '12px Arial';
+        ctx.fillStyle = 'white';
+        ctx.textAlign = 'center';
+        ctx.fillText('Align eye within circle', centerX, centerY + radius * 1.5);
+    }
+    
+    // Capture retina image
+    function captureRetina() {
+        log('Capturing retina image');
+        
+        if (!video.videoWidth) {
+            alert('Camera not ready. Please try again.');
+            return;
+        }
+        
+        // Set canvas size to match video
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        
+        // Capture the current frame
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        // Process to enhance retina features
+        enhanceRetinaImage(ctx);
+        
+        // Convert to data URL
+        retinaData = canvas.toDataURL('image/jpeg', 0.95);
+        capturedRetina.src = retinaData;
+        
+        // Show captured image and validation controls
+        capturedContainer.classList.remove('d-none');
+        resetBtn.classList.remove('d-none');
+        validateBtn.classList.remove('d-none');
+        captureBtn.classList.add('d-none');
+        
+        log('Retina image captured successfully');
+    }
+    
+    // Enhance the retina image to make features more visible
+    function enhanceRetinaImage(ctx) {
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
+        
+        // Focus on red channel for blood vessels
+        for (let i = 0; i < data.length; i += 4) {
+            // Enhance red channel and reduce others for better vessel contrast
+            data[i] = Math.min(255, data[i] * 1.3); // Red
+            data[i + 1] = data[i + 1] * 0.7; // Green
+            data[i + 2] = data[i + 2] * 0.7; // Blue
+        }
+        
+        ctx.putImageData(imageData, 0, 0);
+    }
+    
+    // Reset the retina capture
+    function resetRetinaCapture() {
+        retinaData = null;
+        capturedContainer.classList.add('d-none');
+        resetBtn.classList.add('d-none');
+        validateBtn.classList.add('d-none');
+        captureBtn.classList.remove('d-none');
+        
+        // Clear validation results
+        validationResults.classList.add('d-none');
+        validationSpinner.style.display = 'none';
+        validationSuccess.style.display = 'none';
+        validationError.style.display = 'none';
+    }
+    
+    // Validate the captured retina
+    async function validateRetina() {
+        if (!retinaData) {
+            alert('Please capture a retina image first');
+            return;
+        }
+        
+        log('Starting retina validation');
+        // Make sure validation results container is visible and scrolled into view
+        validationResults.classList.remove('d-none');
+        validationResults.style.display = 'block'; // Explicit display setting
+        validationResults.scrollIntoView({ behavior: 'smooth' });
+        
+        // Show spinner, hide other panels
+        validationSpinner.style.display = 'block';
+        validationSuccess.style.display = 'none';
+        validationError.style.display = 'none';
+        
+        // Log the state of the DOM elements to help debug
+        log('Validation DOM elements:', {
+            results: validationResults.style.display,
+            spinner: validationSpinner.style.display,
+            success: validationSuccess.style.display,
+            error: validationError.style.display
+        });
+        
+        try {
+            log('Sending validation request to API');
+            
+            // Check if we have previous biometric validations
+            const validatedBiometrics = JSON.parse(localStorage.getItem('validatedBiometrics') || '{"face":false,"voice":false,"retina":false,"proximity":false}');
+            const validatedUserIds = JSON.parse(localStorage.getItem('validatedUserIds') || '{"face":null,"voice":null,"retina":null,"proximity":null}');
+            
+            // Check if either face or voice is validated
+            const hasFaceValidation = validatedBiometrics && validatedBiometrics.face === true;
+            const hasVoiceValidation = validatedBiometrics && validatedBiometrics.voice === true;
+            
+            // Get previous user ID if any
+            let previousUserId = null;
+            if (hasFaceValidation) {
+                previousUserId = validatedUserIds.face;
+                log('Previous face validation detected with user ID: ' + previousUserId);
+            } else if (hasVoiceValidation) {
+                previousUserId = validatedUserIds.voice;
+                log('Previous voice validation detected with user ID: ' + previousUserId);
+            }
+            
+            // Include previous validation data for security checks
+            const isSecondValidation = hasFaceValidation || hasVoiceValidation;
+            
+            // API request to validate retina
+            let result;
+            try {
+                const response = await fetch('/biometrics/api/validate/retina', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({
+                        biometric_data: retinaData,
+                        is_second_validation: isSecondValidation,
+                        previous_user_id: previousUserId
+                    })
+                });
+                
+                // Check if response is OK
+                if (!response.ok) {
+                    log('Server returned error status:', response.status);
+                    throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+                }
+                
+                // First try to get the response as text
+                const responseText = await response.text();
+                
+                // Try to parse as JSON
+                try {
+                    result = JSON.parse(responseText);
+                } catch (parseError) {
+                    log('Failed to parse response as JSON:', responseText);
+                    throw new Error('Invalid JSON response from server');
+                }
+                
+                log('Received validation response:', result);
+            } catch (error) {
+                log('Error during retina validation API call:', error.message);
+                
+                // Show error in the validation panel
+                validationSpinner.style.display = 'none';
+                validationError.style.display = 'block';
+                document.getElementById('error-message').textContent = 
+                    `Error communicating with server: ${error.message}. Please try again.`;
+                
+                return; // Exit the function early
+            }
+            
+            validationSpinner.style.display = 'none';
+            
+            // Debug validation panels
+            log('Before processing result - success panel display:', validationSuccess.style.display);
+            
+            // Check for security violations first (highest priority)
+            if (result.security_violation) {
+                log('SECURITY ALERT: Biometric validation detected different users');
+                
+                // Show a security alert
+                validationSuccess.classList.remove('d-none');
+                validationSuccess.style.display = 'block';
+                validationSuccess.innerHTML = `
+                    <div class="alert alert-danger">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-exclamation-triangle-fill me-3 fs-4"></i>
+                            <div>
+                                <h5 class="mb-1">Security Alert: User Mismatch Detected</h5>
+                                <p class="mb-2">The retina validation does not match the previously validated biometrics. 
+                                These biometrics appear to belong to different users.</p>
+                                <div class="mb-2">
+                                    <span class="badge bg-danger">Vehicle Access Denied</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="alert alert-info mt-3">
+                        <div class="d-flex align-items-center">
+                            <div class="spinner-border spinner-border-sm me-2" role="status">
+                                <span class="visually-hidden">Redirecting...</span>
+                            </div>
+                            <div>Redirecting to home page for security reasons...</div>
+                        </div>
+                    </div>
+                `;
+                
+                // Reset all biometric validations for security
+                try {
+                    if (window.biometricAnimation) {
+                        if (typeof window.biometricAnimation.resetBiometricValidations === 'function') {
+                            window.biometricAnimation.resetBiometricValidations();
+                        }
+                        if (typeof window.biometricAnimation.resetSessionValidations === 'function') {
+                            window.biometricAnimation.resetSessionValidations();
+                        }
+                        log('Reset all validations due to security mismatch');
+                    }
+                } catch (error) {
+                    log('Error resetting validations: ' + error);
+                }
+                
+                // Redirect to home page with security alert after a short delay
+                setTimeout(() => {
+                    window.location.href = result.redirect || '/?security_alert=1';
+                }, 2500);
+                
+                return; // Exit early to prevent further processing
+            }
+            else if (result.success) {
+                // Make sure success panel is visible
+                validationSuccess.classList.remove('d-none');
+                validationSuccess.style.display = 'block';
+                
+                // Force browser reflow to ensure the panel is visible
+                void validationSuccess.offsetWidth;
+                
+                log('After forcing success panel visibility:', validationSuccess.style.display);
+                
+                // Store the validated user data globally for the animation to use
+                window.validatedUserData = result;
+                
+                // Also store in localStorage for persistence
+                try {
+                    localStorage.setItem('validatedUserData', JSON.stringify(result));
+                    console.log('Saved validation data to localStorage');
+                } catch (e) {
+                    console.error('Failed to save validation data to localStorage:', e);
+                }
+                
+                // Show user info
+                document.getElementById('user-name').textContent = result.user.name || 'Unknown';
+                document.getElementById('user-email').textContent = result.user.email || 'Not provided';
+                
+                // Update confidence score
+                const confidencePercent = Math.round((result.confidence || 0) * 100);
+                document.getElementById('confidence-score').textContent = confidencePercent;
+                const confidenceBar = document.getElementById('confidence-bar');
+                confidenceBar.style.width = `${confidencePercent}%`;
+                
+                // Set color based on confidence
+                if (confidencePercent >= 90) {
+                    confidenceBar.className = 'progress-bar bg-success';
+                } else if (confidencePercent >= 75) {
+                    confidenceBar.className = 'progress-bar bg-info';
+                } else if (confidencePercent >= 60) {
+                    confidenceBar.className = 'progress-bar bg-warning';
+                } else {
+                    confidenceBar.className = 'progress-bar bg-danger';
+                }
+                
+                // Register this biometric as valid in the animation system
+                if (window.biometricAnimation) {
+                    // Update both overall validations and session validations with user ID
+                    window.biometricAnimation.setBiometricValidated('retina', true, result.user.id);
+                    
+                    // Store user ID in a dedicated variable for debugging
+                    const retinaUserId = result.user.id;
+                    console.log('Retina validation successful for user ID: ' + retinaUserId);
+                    
+                    // Track this validation in the current session
+                    if (typeof window.biometricAnimation.setSessionValidation === 'function') {
+                        window.biometricAnimation.setSessionValidation('retina', true);
+                        log('Updated session validation for retina with user ID: ' + retinaUserId);
+                    } else {
+                        log('Warning: Session validation tracking not available');
+                    }
+                    
+                    // If this is the only biometric validated so far, show a hint
+                    const validatedTypes = Object.keys(window.biometricAnimation.getValidatedBiometrics())
+                        .filter(key => window.biometricAnimation.isValidated(key));
+                    
+                    if (validatedTypes.length === 1) {
+                        const hintEl = document.createElement('div');
+                        hintEl.className = 'alert alert-info mt-3 animation-hint';
+                        hintEl.innerHTML = `
+                            <i class="bi bi-info-circle me-2"></i>
+                            <strong>Hint:</strong> Validate another biometric type to see the car door animation!
+                        `;
+                        document.getElementById('validation-success').appendChild(hintEl);
+                        setTimeout(() => {
+                            if (hintEl.parentNode) {
+                                hintEl.classList.add('fade-out');
+                                setTimeout(() => hintEl.remove(), 500);
+                            }
+                        }, 6000);
+                    }
+                }
+                
+                // Display vehicles
+                vehicleList.innerHTML = '';
+                
+                if (result.vehicles && result.vehicles.length > 0) {
+                    result.vehicles.forEach(vehicle => {
+                        const vehicleCard = document.createElement('div');
+                        vehicleCard.className = 'card mb-3';
+                        vehicleCard.innerHTML = `
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <h5 class="vehicle-title">${vehicle.year} ${vehicle.make} ${vehicle.model}</h5>
+                                        <p class="text-muted mb-2">License: ${vehicle.license_plate || 'N/A'} | VIN: ${vehicle.vin || 'N/A'}</p>
+                                        <p class="vehicle-color">Color: ${vehicle.color || 'N/A'}</p>
+                                    </div>
+                                    <div class="col-md-4 text-end">
+                                        <a href="/vehicles/details/${vehicle.id}" class="btn btn-primary" onclick="console.log('Clicking retina vehicle details link to: /vehicles/details/' + ${vehicle.id})">Vehicle Details</a>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        vehicleList.appendChild(vehicleCard);
+                    });
+                } else {
+                    vehicleList.innerHTML = `
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            No vehicles found for this user.
+                        </div>
+                    `;
+                }
+                
+                // Show success panel with multiple approaches to ensure visibility
+                validationSuccess.classList.remove('d-none');
+                validationSuccess.style.display = 'block';
+                
+                // Force browser reflow again to ensure panel is visible
+                void validationSuccess.offsetWidth;
+                
+                // Debug success panel visibility
+                const computedStyle = window.getComputedStyle(validationSuccess);
+                log('Validation successful - Success panel computed display:', computedStyle.display);
+                
+                // Scroll to results to ensure they're visible
+                validationSuccess.scrollIntoView({ behavior: 'smooth' });
+                
+                // Trigger micro-animation for success
+                if (window.microAnimations || (window.biometricAnimation && window.biometricAnimation.microAnimations)) {
+                    const animationApi = window.microAnimations || window.biometricAnimation.microAnimations;
+                    
+                    // Get the retina icon to animate
+                    const retinaIcon = document.querySelector('.bi-eye-fill');
+                    
+                    setTimeout(() => {
+                        try {
+                            log('Playing retina validation success micro-animation');
+                            animationApi.playSuccessAnimation('retina', retinaIcon || validationSuccess);
+                        } catch (error) {
+                            log('Error playing micro-animation:', error);
+                        }
+                    }, 300); // Small delay for better visual effect
+                }
+                
+                // Add a prominent vehicle details section instead of automatic redirection
+                if (result.vehicles && result.vehicles.length > 0) {
+                    const firstVehicleId = result.vehicles[0].id;
+                    
+                    // Create a prominent action button section
+                    const viewDetailsSection = document.createElement('div');
+                    viewDetailsSection.className = 'mt-4 mb-4 text-center';
+                    viewDetailsSection.innerHTML = `
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h5 class="mb-3">Access Your Vehicle Information</h5>
+                                <a href="/vehicles/details/${firstVehicleId}" class="btn btn-lg btn-primary">
+                                    <i class="bi bi-car-front me-2"></i> View Vehicle Details
+                                </a>
+                                <p class="text-muted mt-2 small">Click to view complete vehicle information</p>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Insert the button at the top of the validation success panel
+                    validationSuccess.insertBefore(viewDetailsSection, validationSuccess.firstChild);
+                    
+                    // Log that we're showing vehicle details option instead of auto-redirecting
+                    log('Showing vehicle details button instead of auto-redirecting');
+                }
+                
+            } else {
+                // Show error with improved user-friendly message
+                const errorMsg = result.error || 'No matching retina pattern found in the database.';
+                
+                // Set a more user-friendly message
+                document.getElementById('error-message').textContent = 
+                    errorMsg.includes('no match found') ? 
+                    'No matching retina pattern was found in our system.' : 
+                    errorMsg;
+                
+                // Make sure the error panel is visible - force display
+                validationError.classList.remove('d-none');
+                validationError.style.display = 'block';
+                log('Validation failed:', result.error, 'Error panel display:', validationError.style.display);
+                
+                // Force browser reflow to ensure the panel is visible
+                void validationError.offsetWidth;
+                
+                // Add a slight delay before scrolling to ensure the DOM has updated
+                setTimeout(() => {
+                    // Scroll to error panel to ensure it's visible
+                    validationError.scrollIntoView({ behavior: 'smooth' });
+                    log('Scrolled to error panel');
+                }, 100);
+            }
+            
+        } catch (error) {
+            log('Validation error:', error);
+            validationSpinner.style.display = 'none';
+            
+            // Set user-friendly error message
+            document.getElementById('error-message').textContent = 
+                'We encountered a problem processing your retina scan. Please try again.';
+            
+            // Make sure error panel is visible - force display
+            validationError.classList.remove('d-none');
+            validationError.style.display = 'block';
+            log('Error panel display after catch:', validationError.style.display);
+            
+            // Force browser reflow to ensure the panel is visible
+            void validationError.offsetWidth;
+            
+            // Add a slight delay before scrolling to ensure the DOM has updated
+            setTimeout(() => {
+                // Scroll to error panel to ensure it's visible
+                validationError.scrollIntoView({ behavior: 'smooth' });
+                log('Scrolled to error panel after error');
+            }, 100);
+        }
+    }
+    
+    // Initialize camera on page load
+    initCamera();
+    
+    // Reset session validations (keep overall validations)
+    function resetSessionValidations() {
+        if (window.biometricAnimation && typeof window.biometricAnimation.resetSessionValidations === 'function') {
+            window.biometricAnimation.resetSessionValidations();
+            log('Reset session validations');
+            alert('Session validations have been reset. You can now validate biometrics again to see the car door animation.');
+        } else {
+            log('Warning: Session validation reset function not available');
+            alert('Unable to reset session validations. Animation system not properly initialized.');
+        }
+    }
+    
+    // Event listeners
+    captureBtn.addEventListener('click', captureRetina);
+    resetBtn.addEventListener('click', resetRetinaCapture);
+    validateBtn.addEventListener('click', validateRetina);
+    if (resetSessionsBtn) {
+        resetSessionsBtn.addEventListener('click', resetSessionValidations);
+    }
+});
+</script>
+
+<style>
+    .retina-capture-container {
+        overflow: hidden;
+        border-radius: 10px;
+        background-color: #000;
+    }
+    
+    #retina-overlay {
+        pointer-events: none;
+    }
+</style>
+{% endblock %}

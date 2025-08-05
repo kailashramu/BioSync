@@ -1,0 +1,229 @@
+{% extends "layout.html" %}
+
+{% block title %}Technology - BioSync{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-5">
+        <div class="col-12 text-center">
+            <h1 class="display-4 mb-4">BioSync Technology</h1>
+            <p class="lead">Exploring the advanced biometric technologies powering our secure vehicle access system</p>
+        </div>
+    </div>
+
+    <div class="row mb-5">
+        <div class="col-md-8 offset-md-2">
+            <h2 class="mb-4">Our Approach</h2>
+            <p>BioSync utilizes a multi-layer biometric authentication framework to ensure the highest level of security while maintaining exceptional user convenience. Unlike traditional security systems that rely on passwords or physical keys, BioSync leverages your unique biological traits to create an authentication system that's both highly secure and effortless to use.</p>
+            
+            <p>Our technology combines multiple authentication factors—something you are (biometrics), something you have (proximity devices), and patterns you create (behavioral biometrics)—into a unified security framework that's virtually impossible to compromise.</p>
+        </div>
+    </div>
+
+    <div class="row mb-5">
+        <div class="col-md-12">
+            <h2 class="mb-4 text-center">Biometric Technologies</h2>
+            
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="card h-100 bg-dark border-0 shadow">
+                        <div class="card-body">
+                            <h3 class="card-title"><i class="bi bi-camera-video me-2"></i>Facial Recognition</h3>
+                            <hr>
+                            <h5>How It Works:</h5>
+                            <p>Our facial recognition system uses computer vision techniques to analyze up to 68 distinct points on a person's face, creating a unique "facial signature." This process includes:</p>
+                            <ul>
+                                <li>Face detection and alignment using Haar cascades or deep learning models</li>
+                                <li>Feature extraction using facial landmarks</li>
+                                <li>Encoding facial features into numerical vectors</li>
+                                <li>Similarity matching against stored templates</li>
+                            </ul>
+                            <h5>Security Features:</h5>
+                            <ul>
+                                <li>Liveness detection to prevent photo/video spoofing</li>
+                                <li>Continuous adaptation to account for changes in appearance</li>
+                                <li>3D depth analysis for improved accuracy and fraud prevention</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card h-100 bg-dark border-0 shadow">
+                        <div class="card-body">
+                            <h3 class="card-title"><i class="bi bi-mic me-2"></i>Voice Recognition</h3>
+                            <hr>
+                            <h5>How It Works:</h5>
+                            <p>Our voice biometric system analyzes the unique patterns in your voice, including:</p>
+                            <ul>
+                                <li>Extraction of Mel-frequency cepstral coefficients (MFCCs)</li>
+                                <li>Analysis of pitch, tone, and speech cadence</li>
+                                <li>Spectral analysis of voice harmonics</li>
+                                <li>Construction of voice prints for comparison</li>
+                            </ul>
+                            <h5>Security Features:</h5>
+                            <ul>
+                                <li>Text-dependent and text-independent verification modes</li>
+                                <li>Anti-spoofing technology to detect recordings</li>
+                                <li>Background noise filtering for improved accuracy</li>
+                                <li>Adaptive learning to accommodate natural voice changes</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card h-100 bg-dark border-0 shadow">
+                        <div class="card-body">
+                            <h3 class="card-title"><i class="bi bi-eye me-2"></i>Retina Scanning</h3>
+                            <hr>
+                            <h5>How It Works:</h5>
+                            <p>Retina scanning captures the unique patterns of blood vessels at the back of the eye:</p>
+                            <ul>
+                                <li>Near-infrared light illumination of the retina</li>
+                                <li>Capture of vascular patterns unique to each individual</li>
+                                <li>Feature extraction focusing on bifurcation and ending points</li>
+                                <li>Pattern matching against enrolled templates</li>
+                            </ul>
+                            <h5>Security Features:</h5>
+                            <ul>
+                                <li>Nearly impossible to replicate or forge</li>
+                                <li>Highly stable biometric that doesn't change over time</li>
+                                <li>Very low false acceptance rates</li>
+                                <li>Liveness detection to prevent artificial eye presentation</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card h-100 bg-dark border-0 shadow">
+                        <div class="card-body">
+                            <h3 class="card-title"><i class="bi bi-signpost-split me-2"></i>Proximity Recognition</h3>
+                            <hr>
+                            <h5>How It Works:</h5>
+                            <p>Our proximity detection system uses multiple wireless technologies:</p>
+                            <ul>
+                                <li>Bluetooth Low Energy (BLE) for medium-range detection</li>
+                                <li>Near Field Communication (NFC) for close-range verification</li>
+                                <li>Ultra-wideband (UWB) for precise spatial positioning</li>
+                                <li>Secure token exchange and cryptographic verification</li>
+                            </ul>
+                            <h5>Security Features:</h5>
+                            <ul>
+                                <li>Rolling security codes that change with each access attempt</li>
+                                <li>End-to-end encryption of proximity signals</li>
+                                <li>Multi-channel verification to prevent relay attacks</li>
+                                <li>Distance-bounding protocols for added security</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-5">
+        <div class="col-md-8 offset-md-2">
+            <h2 class="mb-4">Multi-Factor Fusion Architecture</h2>
+            <p>What makes BioSync uniquely secure is our proprietary multi-factor fusion architecture. Rather than treating each biometric factor as a separate gate, our system:</p>
+            
+            <ul class="mb-4">
+                <li>Combines confidence scores from multiple biometrics</li>
+                <li>Uses weighted scoring based on environmental factors</li>
+                <li>Applies adaptive thresholds based on security context</li>
+                <li>Implements continuous authentication throughout the user session</li>
+            </ul>
+            
+            <p>This approach means that even if one biometric factor is compromised or performing sub-optimally, the overall system security remains intact.</p>
+        </div>
+    </div>
+
+    <div class="row mb-5">
+        <div class="col-md-12">
+            <div class="card bg-dark border-0 shadow">
+                <div class="card-body">
+                    <h2 class="card-title text-center mb-4">Privacy and Security</h2>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h4><i class="bi bi-shield-lock me-2"></i>How We Protect Your Data</h4>
+                            <ul>
+                                <li>All biometric templates are encrypted using AES-256 encryption</li>
+                                <li>Data is stored locally on secure hardware when possible</li>
+                                <li>Cloud storage uses zero-knowledge encryption architecture</li>
+                                <li>Regular security audits and penetration testing</li>
+                                <li>Compliance with global biometric data privacy regulations</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h4><i class="bi bi-person-lock me-2"></i>User Control</h4>
+                            <ul>
+                                <li>Full transparency on what data is collected and how it's used</li>
+                                <li>Option to delete biometric data at any time</li>
+                                <li>Ability to disable specific biometric factors</li>
+                                <li>Clear audit logs of all authentication attempts</li>
+                                <li>Consent required before enrollment of any new biometric</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8 offset-md-2 text-center">
+            <h2 class="mb-4">The Future of Biometric Authentication</h2>
+            <p>BioSync is continuously evolving our technology platform. Our research and development roadmap includes:</p>
+            
+            <div class="row g-4 mt-3">
+                <div class="col-md-4">
+                    <div class="p-3 border border-secondary rounded">
+                        <i class="bi bi-heart-pulse fs-1 mb-3"></i>
+                        <h5>Behavioral Biometrics</h5>
+                        <p class="small">Analyzing patterns in how you interact with your devices</p>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="p-3 border border-secondary rounded">
+                        <i class="bi bi-person-bounding-box fs-1 mb-3"></i>
+                        <h5>Gait Recognition</h5>
+                        <p class="small">Identifying users by their unique walking pattern</p>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="p-3 border border-secondary rounded">
+                        <i class="bi bi-ear fs-1 mb-3"></i>
+                        <h5>Ear Acoustic Authentication</h5>
+                        <p class="small">Using the unique way sound travels through your ear canal</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<style>
+    .card-title {
+        color: var(--bs-primary);
+    }
+    
+    .card {
+        transition: transform 0.3s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .bi {
+        color: var(--bs-primary);
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800px" height="300px" viewBox="0 0 800 300" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Audi Car Animation</title>
+    <g id="car-animation" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <!-- Car Body -->
+        <path d="M150,170 C160,140 180,130 220,120 C260,110 360,110 480,110 C600,110 650,120 670,130 C690,140 700,150 700,170 L700,200 C700,210 690,220 680,220 L170,220 C160,220 150,210 150,200 L150,170 Z" id="car-body" fill="#333333"></path>
+        
+        <!-- Car Roof -->
+        <path d="M240,120 C260,90 320,80 420,80 C520,80 580,90 600,120 L240,120 Z" id="car-roof" fill="#222222"></path>
+        
+        <!-- Windows -->
+        <path d="M250,120 C270,100 320,90 400,90 C480,90 530,100 550,120 L250,120 Z" id="windshield" fill="#a8d8ff" opacity="0.7"></path>
+        <rect id="side-window-1" fill="#a8d8ff" opacity="0.6" x="240" y="120" width="60" height="30" rx="5"></rect>
+        <rect id="side-window-2" fill="#a8d8ff" opacity="0.6" x="320" y="120" width="80" height="30" rx="5"></rect>
+        <rect id="side-window-3" fill="#a8d8ff" opacity="0.6" x="420" y="120" width="80" height="30" rx="5"></rect>
+        <rect id="side-window-4" fill="#a8d8ff" opacity="0.6" x="520" y="120" width="60" height="30" rx="5"></rect>
+        
+        <!-- Car Bottom Details -->
+        <rect id="bottom-detail" fill="#111111" x="170" y="200" width="500" height="20" rx="5"></rect>
+        
+        <!-- Wheels -->
+        <g id="wheels">
+            <circle id="wheel-1" fill="#111111" cx="230" cy="220" r="40"></circle>
+            <circle id="wheel-2" fill="#111111" cx="570" cy="220" r="40"></circle>
+            
+            <circle id="wheel-rim-1" fill="#555555" cx="230" cy="220" r="25"></circle>
+            <circle id="wheel-rim-2" fill="#555555" cx="570" cy="220" r="25"></circle>
+            
+            <circle id="wheel-center-1" fill="#e5e5e5" cx="230" cy="220" r="10"></circle>
+            <circle id="wheel-center-2" fill="#e5e5e5" cx="570" cy="220" r="10"></circle>
+        </g>
+        
+        <!-- Headlights and Taillights -->
+        <g id="lights">
+            <rect id="headlight-l" fill="#ffffff" x="150" y="150" width="15" height="20" rx="5"></rect>
+            <rect id="headlight-r" fill="#ffffff" x="150" y="180" width="15" height="20" rx="5"></rect>
+            <rect id="taillight-l" fill="#ff0000" x="685" y="150" width="15" height="20" rx="5"></rect>
+            <rect id="taillight-r" fill="#ff0000" x="685" y="180" width="15" height="20" rx="5"></rect>
+        </g>
+        
+        <!-- Grille -->
+        <g id="grille" transform="translate(155, 165)">
+            <rect id="grille-outline" fill="#111111" x="0" y="0" width="40" height="20" rx="2"></rect>
+            <rect id="grille-bar-1" fill="#e5e5e5" x="5" y="3" width="30" height="2"></rect>
+            <rect id="grille-bar-2" fill="#e5e5e5" x="5" y="9" width="30" height="2"></rect>
+            <rect id="grille-bar-3" fill="#e5e5e5" x="5" y="15" width="30" height="2"></rect>
+        </g>
+        
+        <!-- Audi Rings on Grille -->
+        <g id="audi-rings" transform="translate(170, 174)">
+            <circle cx="2" cy="2" r="2" fill="#e5e5e5"></circle>
+            <circle cx="7" cy="2" r="2" fill="#e5e5e5"></circle>
+            <circle cx="12" cy="2" r="2" fill="#e5e5e5"></circle>
+            <circle cx="17" cy="2" r="2" fill="#e5e5e5"></circle>
+        </g>
+        
+        <!-- Shadow -->
+        <ellipse id="shadow" fill="#000000" opacity="0.3" cx="400" cy="260" rx="280" ry="20"></ellipse>
+        
+        <!-- Headlight beams (for animation) -->
+        <g id="headlight-beams" opacity="0">
+            <path d="M165,160 L100,140 L100,180 L165,160 Z" fill="url(#headlight-gradient)"></path>
+            <path d="M165,190 L100,170 L100,210 L165,190 Z" fill="url(#headlight-gradient)"></path>
+        </g>
+    </g>
+    
+    <!-- Gradients -->
+    <defs>
+        <linearGradient id="headlight-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.7"></stop>
+            <stop offset="100%" style="stop-color:#ffffff;stop-opacity:0"></stop>
+        </linearGradient>
+    </defs>
+    
+    <!-- Animation -->
+    <style>
+        @keyframes carFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        
+        @keyframes wheelRotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes headlightPulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+        
+        @keyframes beamPulse {
+            0%, 100% { opacity: 0.1; }
+            50% { opacity: 0.4; }
+        }
+        
+        #car-animation {
+            animation: carFloat 4s ease-in-out infinite;
+        }
+        
+        #wheel-rim-1, #wheel-rim-2 {
+            animation: wheelRotate 8s linear infinite;
+            transform-origin: center center;
+        }
+        
+        #headlight-l, #headlight-r {
+            animation: headlightPulse 2s ease-in-out infinite;
+        }
+        
+        #headlight-beams {
+            animation: beamPulse 2s ease-in-out infinite;
+        }
+    </style>
+</svg>

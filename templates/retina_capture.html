@@ -1,0 +1,142 @@
+{% extends "layout.html" %}
+
+{% block title %}Retina Biometrics - BioSecure{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <div class="card border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-eye me-2"></i>RETINA BIOMETRICS REGISTRATION</h5>
+                </div>
+                <div class="card-body">
+                    <p class="lead text-center mb-4">Capture your retina pattern for high-security biometric authentication</p>
+                    
+                    <div class="row mb-4">
+                        <div class="col-lg-8 mx-auto">
+                            <div class="alert alert-info bg-light border">
+                                <h5 class="d-flex align-items-center mb-3">
+                                    <i class="bi bi-info-circle-fill me-2 text-primary"></i>
+                                    <span>Retina Scan Instructions</span>
+                                </h5>
+                                <ul class="mb-0">
+                                    <li>Ensure you are in a well-lit area, but avoid direct bright light in your eyes</li>
+                                    <li>Position your eye within the red targeting circles on the screen</li>
+                                    <li>Hold steady and try not to blink during the capture process</li>
+                                    <li>Move slightly closer if needed for a clearer image</li>
+                                    <li>Click the "Capture" button when your eye is properly positioned</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="retina-capture-container" class="row mb-4">
+                        <div class="col-md-8 mx-auto">
+                            <div class="retina-capture-container position-relative">
+                                <!-- Video for retina capture -->
+                                <video id="retina-video" class="w-100 rounded-3" style="background-color: #000; max-height: 400px;" autoplay playsinline></video>
+                                
+                                <!-- Scanning animation bar -->
+                                <div class="scanner-bar"></div>
+                                
+                                <!-- Overlay for retina scan target -->
+                                <canvas id="retina-overlay" class="position-absolute top-0 start-0 w-100 h-100"></canvas>
+                                
+                                <!-- Canvas for capturing still retina image -->
+                                <canvas id="retina-canvas" class="w-100 rounded-3" style="background-color: #000; max-height: 400px; display: none;"></canvas>
+                            </div>
+                            
+                            <div class="d-flex justify-content-center gap-3 mt-3">
+                                <span id="scanning-indicator" class="badge bg-danger p-2 mb-3">
+                                    <span class="spinner-grow spinner-grow-sm"></span>
+                                    SCANNING RETINA
+                                </span>
+                            </div>
+                            
+                            <form id="retina-form" method="POST" action="{{ url_for('biometrics.retina_capture') }}">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <!-- Hidden field will be populated with retina data by JavaScript -->
+                            </form>
+                            
+                            <div class="text-center mt-3">
+                                <button id="capture-retina-button" class="btn btn-primary me-2" disabled>
+                                    <i class="bi bi-camera me-1"></i> Capture Retina
+                                </button>
+                                <button id="retake-retina-button" class="btn btn-outline-secondary me-2" disabled>
+                                    <i class="bi bi-arrow-repeat me-1"></i> Retake
+                                </button>
+                                <button id="save-retina-button" class="btn btn-success" disabled>
+                                    <i class="bi bi-save me-1"></i> Save Biometric
+                                </button>
+                            </div>
+                            
+                            <div id="processing-message" class="alert alert-info mt-3 text-center" style="display: none;">
+                                <div class="spinner-border spinner-border-sm text-primary me-2" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                Processing retina data...
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-lg-8 mx-auto">
+                            <div class="alert alert-warning">
+                                <h5><i class="bi bi-exclamation-triangle-fill me-2"></i>Important</h5>
+                                <p class="mb-0">Retina scanning is one of the most secure biometric methods available. However, please note that this web-based scanner is primarily for demonstration purposes. For production use, specialized retina scanning hardware would provide higher accuracy.</p>
+                            </div>
+                            
+                            <div class="alert alert-info">
+                                <h5><i class="bi bi-shield-check me-2"></i>Privacy Information</h5>
+                                <p class="mb-0">Your retina data is processed and stored securely. The image is used only for authentication purposes and is encrypted in our database. You can reset or delete your retina biometric data at any time from your dashboard.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/retina.js') }}"></script>
+
+<style>
+    .retina-capture-container {
+        overflow: hidden;
+        border-radius: 10px;
+        background-color: #000;
+        position: relative;
+    }
+    
+    #retina-overlay {
+        pointer-events: none;
+    }
+    
+    #scanning-indicator {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.85rem;
+        letter-spacing: 1px;
+    }
+    
+    .scanner-bar {
+        position: absolute;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, rgba(255, 0, 0, 0.8), transparent);
+        z-index: 5;
+        animation: scan 2s ease-in-out infinite;
+    }
+    
+    @keyframes scan {
+        0% { top: 20%; opacity: 1; }
+        50% { top: 80%; opacity: 0.8; }
+        100% { top: 20%; opacity: 1; }
+    }
+</style>
+{% endblock %}

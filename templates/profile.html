@@ -1,0 +1,168 @@
+{% extends "layout.html" %}
+
+{% block title %}Edit Profile - BioSecure{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h1>Edit Profile</h1>
+        <p class="lead">Update your personal information and account settings</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Personal Information</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('profile.edit_profile') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="first_name" class="form-label">First Name</label>
+                            <input type="text" class="form-control" id="first_name" name="first_name" value="{{ current_user.first_name }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="last_name" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" id="last_name" name="last_name" value="{{ current_user.last_name }}">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email Address</label>
+                        <input type="email" class="form-control" id="email" name="email" value="{{ current_user.email }}">
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <h5 class="mb-3">Change Password</h5>
+                    <p class="text-muted mb-3">Leave these fields blank if you don't want to change your password</p>
+                    
+                    <div class="mb-3">
+                        <label for="current_password" class="form-label">Current Password</label>
+                        <input type="password" class="form-control" id="current_password" name="current_password">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="new_password" class="form-label">New Password</label>
+                        <input type="password" class="form-control" id="new_password" name="new_password">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="confirm_password" class="form-label">Confirm New Password</label>
+                        <input type="password" class="form-control" id="confirm_password" name="confirm_password">
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('profile.dashboard') }}" class="btn btn-outline-secondary me-md-2">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Account Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Username:</strong> {{ current_user.username }}</p>
+                        <p><strong>Account Created:</strong> {{ current_user.created_at.strftime('%Y-%m-%d') }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Last Updated:</strong> {{ current_user.updated_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                        <p>
+                            <strong>Multi-Factor Authentication:</strong>
+                            {% if current_user.mfa_enabled %}
+                            <span class="badge bg-success">Enabled</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Disabled</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <a href="{{ url_for('auth.mfa_settings') }}" class="btn btn-outline-primary">
+                        <i class="bi bi-shield-lock me-2"></i> Manage Multi-Factor Authentication
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0">Danger Zone</h5>
+            </div>
+            <div class="card-body">
+                <h6>Reset All Biometric Data</h6>
+                <p>This will permanently delete all your biometric data from our system. This action cannot be undone.</p>
+                <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#resetBiometricsModal">
+                    Reset All Biometric Data
+                </button>
+                
+                <!-- Hidden form to reset all biometrics data -->
+                <form id="reset-all-biometrics-form" method="POST" action="{{ url_for('profile.reset_biometrics', biometric_type='all') }}" class="d-none">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reset Biometrics Modal -->
+<div class="modal fade" id="resetBiometricsModal" tabindex="-1" aria-labelledby="resetBiometricsModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="resetBiometricsModalLabel">Confirm Reset</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <strong>Warning:</strong> This will permanently delete all your biometric data, including:
+                </div>
+                <ul>
+                    <li>Face biometric data</li>
+                    <li>Voice biometric data</li>
+                    <li>Retina biometric data</li>
+                    <li>Proximity data</li>
+                </ul>
+                <p>This action cannot be undone. Are you sure you want to continue?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                
+                <!-- Reset ALL button -->
+                <form method="POST" action="{{ url_for('profile.reset_biometrics', biometric_type='all') }}" class="d-inline me-3">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-danger">Reset ALL Data</button>
+                </form>
+                
+                <div class="d-flex">
+                    <form method="POST" action="{{ url_for('profile.reset_biometrics', biometric_type='face') }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-outline-danger me-2">Reset Face</button>
+                    </form>
+                    <form method="POST" action="{{ url_for('profile.reset_biometrics', biometric_type='voice') }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-outline-danger me-2">Reset Voice</button>
+                    </form>
+                    <form method="POST" action="{{ url_for('profile.reset_biometrics', biometric_type='retina') }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-outline-danger me-2">Reset Retina</button>
+                    </form>
+                    <form method="POST" action="{{ url_for('profile.reset_biometrics', biometric_type='proximity') }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-outline-danger">Reset Proximity</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

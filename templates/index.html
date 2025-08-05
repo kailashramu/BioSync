@@ -1,0 +1,251 @@
+{% extends "layout.html" %}
+
+{% block title %}BioSync - Where your car knows you{% endblock %}
+
+{% block content %}
+{% if request.args.get('security_alert') == '1' %}
+<div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <div class="d-flex align-items-center">
+        <i class="bi bi-shield-exclamation me-3 fs-3"></i>
+        <div>
+            <h4 class="alert-heading">Security Alert</h4>
+            <p>A biometric validation mismatch was detected during the authentication process. For security reasons, we've reset your session and returned you to the home page.</p>
+            <p class="mb-0">This happens when biometrics from different users are detected in the same authentication sequence.</p>
+        </div>
+    </div>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endif %}
+
+<div class="home-jumbotron">
+    <div class="row">
+        <div class="col-md-8">
+            <h1>BIOSYNC <span class="tagline-inline">Where your car knows you</span></h1>
+            <p class="lead">Experience the next generation of vehicle security with advanced biometric authentication. Multiple verification layers provide unparalleled protection and convenience.</p>
+            {% if not current_user.is_authenticated %}
+            <div class="mt-5">
+                <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg me-3">CREATE ACCOUNT</a>
+                <a href="{{ url_for('auth.login') }}" class="btn btn-outline-secondary btn-lg">SIGN IN</a>
+            </div>
+            {% else %}
+            <div class="mt-5">
+                <a href="{{ url_for('profile.dashboard') }}" class="btn btn-primary btn-lg">MY DASHBOARD</a>
+            </div>
+            {% endif %}
+        </div>
+        <div class="col-md-4 d-flex align-items-center justify-content-center">
+            <div class="biometric-graphics-container">
+                <!-- Biometric Authentication Icon Set - SVG Graphics -->
+                <svg class="biometric-icons" viewBox="0 0 240 120" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Face Recognition Icon -->
+                    <g transform="translate(0,0)">
+                        <circle cx="40" cy="40" r="38" fill="none" stroke="var(--bs-primary)" stroke-width="2" opacity="0.2"/>
+                        <circle cx="40" cy="40" r="30" fill="none" stroke="var(--bs-primary)" stroke-width="2" opacity="0.6"/>
+                        <!-- Face Outline -->
+                        <path d="M40,20 C25,20 22,35 22,50 C22,65 30,70 40,70 C50,70 58,65 58,50 C58,35 55,20 40,20" 
+                              fill="none" stroke="#fff" stroke-width="1.5"/>
+                        <!-- Eyes -->
+                        <circle cx="30" cy="38" r="3" fill="#fff"/>
+                        <circle cx="50" cy="38" r="3" fill="#fff"/>
+                        <!-- Scanning Lines -->
+                        <line x1="15" y1="30" x2="65" y2="30" stroke="var(--bs-primary)" stroke-width="1" stroke-dasharray="2,2"/>
+                        <line x1="15" y1="40" x2="65" y2="40" stroke="var(--bs-primary)" stroke-width="1" stroke-dasharray="2,2"/>
+                        <line x1="15" y1="50" x2="65" y2="50" stroke="var(--bs-primary)" stroke-width="1" stroke-dasharray="2,2"/>
+                    </g>
+                    
+                    <!-- Voice Recognition Icon -->
+                    <g transform="translate(80,0)">
+                        <circle cx="40" cy="40" r="38" fill="none" stroke="var(--bs-primary)" stroke-width="2" opacity="0.2"/>
+                        <circle cx="40" cy="40" r="30" fill="none" stroke="var(--bs-primary)" stroke-width="2" opacity="0.6"/>
+                        <!-- Sound Waves -->
+                        <path d="M40,25 L40,55" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M32,30 C32,30 28,35 28,40 C28,45 32,50 32,50" stroke="#fff" stroke-width="1.5" fill="none"/>
+                        <path d="M48,30 C48,30 52,35 52,40 C52,45 48,50 48,50" stroke="#fff" stroke-width="1.5" fill="none"/>
+                        <path d="M25,27 C25,27 20,32 20,40 C20,48 25,53 25,53" stroke="var(--bs-primary)" stroke-width="1.5" fill="none"/>
+                        <path d="M55,27 C55,27 60,32 60,40 C60,48 55,53 55,53" stroke="var(--bs-primary)" stroke-width="1.5" fill="none"/>
+                    </g>
+                    
+                    <!-- Retina Scan Icon -->
+                    <g transform="translate(160,0)">
+                        <circle cx="40" cy="40" r="38" fill="none" stroke="var(--bs-primary)" stroke-width="2" opacity="0.2"/>
+                        <circle cx="40" cy="40" r="30" fill="none" stroke="var(--bs-primary)" stroke-width="2" opacity="0.6"/>
+                        <!-- Eye -->
+                        <ellipse cx="40" cy="40" rx="20" ry="15" fill="none" stroke="#fff" stroke-width="1.5"/>
+                        <!-- Iris -->
+                        <circle cx="40" cy="40" r="10" fill="none" stroke="#fff" stroke-width="1.5"/>
+                        <!-- Pupil -->
+                        <circle cx="40" cy="40" r="4" fill="#fff"/>
+                        <!-- Scanning Beam -->
+                        <line x1="10" y1="40" x2="70" y2="40" stroke="var(--bs-primary)" stroke-width="1"/>
+                        <!-- Retina Pattern -->
+                        <path d="M40,30 C45,32 50,35 45,40 C50,45 45,48 40,50 C35,48 30,45 35,40 C30,35 35,32 40,30" 
+                              stroke="var(--bs-primary)" stroke-width="0.75" fill="none"/>
+                    </g>
+                    
+                    <!-- Digital Key Icon -->
+                    <g transform="translate(40,70)">
+                        <circle cx="40" cy="40" r="30" fill="none" stroke="var(--bs-primary)" stroke-width="2" opacity="0.6"/>
+                        <!-- Key Shape -->
+                        <path d="M55,40 L40,40 C40,33 34,28 27,28 C20,28 15,33 15,40 C15,47 20,52 27,52 C34,52 40,47 40,40" 
+                              stroke="#fff" stroke-width="1.5" fill="none"/>
+                        <!-- Key Circle -->
+                        <circle cx="27" cy="40" r="5" fill="none" stroke="#fff" stroke-width="1.5"/>
+                        <!-- Signal Waves -->
+                        <path d="M45,30 C48,33 50,36 50,40 C50,44 48,47 45,50" stroke="var(--bs-primary)" stroke-width="1" fill="none" stroke-dasharray="2,2"/>
+                        <path d="M50,25 C55,30 58,35 58,40 C58,45 55,50 50,55" stroke="var(--bs-primary)" stroke-width="1" fill="none" stroke-dasharray="2,2"/>
+                    </g>
+                    
+                    <!-- Mobile Device Icon -->
+                    <g transform="translate(120,70)">
+                        <circle cx="40" cy="40" r="30" fill="none" stroke="var(--bs-primary)" stroke-width="2" opacity="0.6"/>
+                        <!-- Phone Outline -->
+                        <rect x="30" y="25" width="20" height="35" rx="2" ry="2" fill="none" stroke="#fff" stroke-width="1.5"/>
+                        <!-- Screen -->
+                        <rect x="32" y="28" width="16" height="26" rx="1" ry="1" fill="none" stroke="#fff" stroke-width="0.75"/>
+                        <!-- Home Button -->
+                        <circle cx="40" cy="58" r="1.5" fill="#fff"/>
+                        <!-- Connection Signal -->
+                        <path d="M23,40 C23,40 26,36 30,36" stroke="var(--bs-primary)" stroke-width="1" fill="none"/>
+                        <path d="M20,45 C20,45 26,32 30,32" stroke="var(--bs-primary)" stroke-width="1" fill="none"/>
+                        <path d="M57,40 C57,40 54,36 50,36" stroke="var(--bs-primary)" stroke-width="1" fill="none"/>
+                        <path d="M60,45 C60,45 54,32 50,32" stroke="var(--bs-primary)" stroke-width="1" fill="none"/>
+                    </g>
+                </svg>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-5">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">FUTURE MOBILITY SOLUTIONS</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li class="mb-3"><i class="bi bi-taxi-front me-2" style="color: var(--bs-primary);"></i> Seamless authentication for ride-sharing and taxi services</li>
+                    <li class="mb-3"><i class="bi bi-building me-2" style="color: var(--bs-primary);"></i> Corporate fleet integration for office commutes</li>
+                    <li class="mb-3"><i class="bi bi-person-badge me-2" style="color: var(--bs-primary);"></i> Driver verification for autonomous vehicle handover</li>
+                    <li class="mb-3"><i class="bi bi-globe me-2" style="color: var(--bs-primary);"></i> Cross-platform compatibility with major mobility providers</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">GETTING STARTED</h5>
+            </div>
+            <div class="card-body">
+                <ol class="biosync-getting-started">
+                    <li class="mb-3">Create your BioSync account</li>
+                    <li class="mb-3">Set up your biometric profile with facial, voice, and retina data</li>
+                    <li class="mb-3">Register your vehicles or commute services</li>
+                    <li class="mb-3">Control your vehicle and ride-sharing access settings</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="home-features">
+    <h2>TECHNOLOGY FEATURES</h2>
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 biometric-card">
+                <div class="card-body text-center">
+                    <i class="bi bi-camera-video biometric-card-icon"></i>
+                    <h5 class="card-title">FACIAL RECOGNITION</h5>
+                    <p class="card-text">Advanced facial recognition technology identifies the driver instantly for secure and seamless access.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 biometric-card">
+                <div class="card-body text-center">
+                    <i class="bi bi-mic biometric-card-icon"></i>
+                    <h5 class="card-title">VOICE RECOGNITION</h5>
+                    <p class="card-text">Proprietary voice pattern analysis provides an additional layer of security through voiceprint matching.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 biometric-card">
+                <div class="card-body text-center">
+                    <i class="bi bi-eye biometric-card-icon"></i>
+                    <h5 class="card-title">RETINA SCANNING</h5>
+                    <p class="card-text">Military-grade retina scanning technology offers the highest level of biometric security verification.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 biometric-card">
+                <div class="card-body text-center">
+                    <i class="bi bi-key biometric-card-icon"></i>
+                    <h5 class="card-title">DIGITAL KEY</h5>
+                    <p class="card-text">Next-generation digital key technology works in proximity to any supported vehicle for keyless operation.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 biometric-card">
+                <div class="card-body text-center">
+                    <i class="bi bi-phone biometric-card-icon"></i>
+                    <h5 class="card-title">MOBILE INTEGRATION</h5>
+                    <p class="card-text">Seamless integration with your smartphone provides an additional layer of authentication and control.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 biometric-card">
+                <div class="card-body text-center">
+                    <i class="bi bi-car-front biometric-card-icon"></i>
+                    <h5 class="card-title">MULTI-VEHICLE SUPPORT</h5>
+                    <p class="card-text">Manage multiple vehicles and ride services with personalized settings and access controls.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
+
+{% block styles %}
+<style>
+    .biometric-icons {
+        height: 150px;
+        width: 100%;
+        max-width: 300px;
+    }
+    
+    .biometric-graphics-container {
+        text-align: center;
+        padding: 10px;
+    }
+    
+    .tagline-inline {
+        font-size: 0.4em;
+        font-weight: 300;
+        color: var(--bs-secondary);
+        display: block;
+        margin-top: 0.5rem;
+        letter-spacing: 0.05em;
+    }
+    
+    .biosync-tagline h3 {
+        font-weight: 300;
+        letter-spacing: 0.1em;
+        margin-bottom: 0.5rem;
+    }
+    
+    .biosync-tagline p {
+        color: var(--bs-secondary);
+    }
+    
+    .biosync-getting-started li {
+        color: var(--bs-secondary);
+    }
+</style>
+{% endblock %}

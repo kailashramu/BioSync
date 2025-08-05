@@ -1,0 +1,695 @@
+{% extends "layout.html" %}
+
+{% block title %}Vehicle Details - BioSync{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">VEHICLE DETAILS</h5>
+                    {% if current_user.is_authenticated and current_user.id == vehicle.user_id %}
+                    <div>
+                        <a href="{{ url_for('vehicle.edit_vehicle', vehicle_id=vehicle.id) }}" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-pencil me-1"></i> Edit
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <!-- Biometric Validation Prompt Area -->
+                    <div id="biometric-prompt-area" class="mb-4">
+                        <!-- Dynamic content will be inserted here by JavaScript -->
+                    </div>
+                    
+                    <!-- Voice Validation Prompt Template (hidden) -->
+                    <template id="voice-validation-template">
+                        <div class="alert alert-info">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-mic-fill me-3 fs-4 pulse-icon"></i>
+                                <div>
+                                    <h5 class="mb-1">Perform one more biometric verification</h5>
+                                    <p class="mb-2">Face recognition successful! Complete voice validation to unlock vehicle access.</p>
+                                    <a href="{{ url_for('biometrics.validate_voice') }}" class="btn btn-primary btn-pulse">
+                                        <i class="bi bi-mic me-1"></i> Validate Voice
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                    
+                    <!-- Retina Validation Prompt Template (hidden) -->
+                    <template id="retina-validation-template">
+                        <div class="alert alert-info">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-eye-fill me-3 fs-4 pulse-icon"></i>
+                                <div>
+                                    <h5 class="mb-1">Perform one more biometric verification</h5>
+                                    <p class="mb-2">Face recognition successful! Complete retina validation to unlock vehicle access.</p>
+                                    <a href="{{ url_for('biometrics.validate_retina') }}" class="btn btn-primary btn-pulse">
+                                        <i class="bi bi-eye me-1"></i> Validate Retina
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                    
+                    <!-- Multiple Biometrics Validated Message Template (hidden) -->
+                    <template id="validation-complete-template">
+                        <div class="alert alert-success">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-check-circle-fill me-3 fs-4"></i>
+                                <div>
+                                    <h5 class="mb-1">Biometric validation complete!</h5>
+                                    <p class="mb-0">Multiple biometrics have been validated successfully. Vehicle access is now available.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <!-- Main Vehicle Image -->
+                            <div class="vehicle-image mb-3 text-center" id="mainVehicleImage">
+                                <div class="p-3 border bg-dark rounded shadow-sm">
+                                    {% if vehicle.make.lower() == 'audi' %}
+                                        {% set model_lower = vehicle.model.lower() %}
+                                        {% if model_lower in ['a6', 'q6', 'q9'] %}
+                                            <img src="{{ url_for('static', filename='images/vehicles/audi/' + model_lower + '.svg') }}" alt="{{ vehicle.make }} {{ vehicle.model }}" class="img-fluid">
+                                        {% else %}
+                                            <img src="{{ url_for('static', filename='images/vehicles/audi/default.svg') }}" alt="{{ vehicle.make }} {{ vehicle.model }}" class="img-fluid">
+                                        {% endif %}
+                                    {% else %}
+                                        <img src="{{ url_for('static', filename='images/vehicle_placeholder.svg') }}" alt="{{ vehicle.make }} {{ vehicle.model }}" class="img-fluid">
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <!-- Image Gallery Thumbnails -->
+                            {% if vehicle.make.lower() == 'audi' %}
+                                {% set model_lower = vehicle.model.lower() %}
+                                {% if model_lower in ['a6', 'q6', 'q9'] %}
+                                <div class="vehicle-gallery d-flex justify-content-center gap-2 mb-3">
+                                    <div class="gallery-thumbnail border p-1" onclick="updateMainImage('{{ url_for('static', filename='images/vehicles/audi/' + model_lower + '.svg') }}')">
+                                        <img src="{{ url_for('static', filename='images/vehicles/audi/' + model_lower + '.svg') }}" alt="Front View" class="img-fluid" style="height: 60px; width: 80px; object-fit: contain;">
+                                        <div class="text-center mt-1">
+                                            <small class="text-light">Front</small>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="gallery-thumbnail border p-1" onclick="updateMainImage('{{ url_for('static', filename='images/vehicles/audi/' + model_lower + '-side.svg') }}')">
+                                        <img src="{{ url_for('static', filename='images/vehicles/audi/' + model_lower + '-side.svg') }}" alt="Side View" class="img-fluid" style="height: 60px; width: 80px; object-fit: contain;">
+                                        <div class="text-center mt-1">
+                                            <small class="text-light">Side</small>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="gallery-thumbnail border p-1" onclick="updateMainImage('{{ url_for('static', filename='images/vehicles/audi/' + model_lower + '-rear.svg') }}')">
+                                        <img src="{{ url_for('static', filename='images/vehicles/audi/' + model_lower + '-rear.svg') }}" alt="Rear View" class="img-fluid" style="height: 60px; width: 80px; object-fit: contain;">
+                                        <div class="text-center mt-1">
+                                            <small class="text-light">Rear</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <h4 class="mb-3">{{ vehicle.year }} {{ vehicle.make }} {{ vehicle.model }}</h4>
+                            <div class="mb-3">
+                                <p class="d-flex align-items-center mb-2">
+                                    <span class="badge bg-secondary me-2" style="width: 80px;">Color</span>
+                                    <strong class="ms-2">{{ vehicle.color or 'Not specified' }}</strong>
+                                </p>
+                                <p class="d-flex align-items-center mb-2">
+                                    <span class="badge bg-secondary me-2" style="width: 80px;">License</span>
+                                    <strong class="ms-2">{{ vehicle.license_plate or 'Not specified' }}</strong>
+                                </p>
+                                <p class="d-flex align-items-center mb-2">
+                                    <span class="badge bg-secondary me-2" style="width: 80px;">VIN</span>
+                                    <strong class="ms-2">{{ vehicle.vin or 'Not specified' }}</strong>
+                                </p>
+                                
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-4" id="vehicle-access-section">
+                        <div class="col-12">
+                            <div class="card border-0 bg-light shadow-sm">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="me-3">
+                                            <i class="bi bi-shield-lock fs-1 text-primary"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="mb-1 text-black">Vehicle Access</h4>
+                                            <p class="mb-0 text-black">Validate another biometric method to access this vehicle. Validated methods will appear as disabled.</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row g-3" id="biometric-options-container">
+                                        <!-- Biometric options will be dynamically injected here based on session state -->
+                                    </div>
+                                    
+                                    <!-- Templates for validation options -->
+                                    <template id="voice-validation-option">
+                                        <div class="col-md-6">
+                                            <div class="card h-100 bg-gradient border-0" style="background-color: rgba(25, 135, 84, 0.1);">
+                                                <div class="card-body d-flex align-items-center">
+                                                    <div class="me-3">
+                                                        <i class="bi bi-mic-fill fs-1 text-success"></i>
+                                                    </div>
+                                                    <div>
+                                                        <h5 class="mb-1 text-black">Voice Recognition</h5>
+                                                        <p class="mb-3 text-black">Verify your identity using voice authentication to unlock the vehicle</p>
+                                                        <a href="{{ url_for('biometrics.validate_voice') }}" class="btn btn-success">
+                                                            <i class="bi bi-mic me-1"></i> Validate Voice
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                    
+                                    <template id="face-validation-option">
+                                        <div class="col-md-6">
+                                            <div class="card h-100 bg-gradient border-0" style="background-color: rgba(220, 53, 69, 0.1);">
+                                                <div class="card-body d-flex align-items-center">
+                                                    <div class="me-3">
+                                                        <i class="bi bi-person-badge-fill fs-1 text-danger"></i>
+                                                    </div>
+                                                    <div>
+                                                        <h5 class="mb-1 text-black">Facial Recognition</h5>
+                                                        <p class="mb-3 text-black">Use your face to verify identity and gain vehicle access</p>
+                                                        <a href="{{ url_for('biometrics.validate_face') }}" class="btn btn-danger">
+                                                            <i class="bi bi-camera me-1"></i> Validate Face
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                    
+                                    <template id="retina-validation-option">
+                                        <div class="col-md-6">
+                                            <div class="card h-100 bg-gradient border-0" style="background-color: rgba(13, 110, 253, 0.1);">
+                                                <div class="card-body d-flex align-items-center">
+                                                    <div class="me-3">
+                                                        <i class="bi bi-eye-fill fs-1 text-primary"></i>
+                                                    </div>
+                                                    <div>
+                                                        <h5 class="mb-1 text-black">Retina Scan</h5>
+                                                        <p class="mb-3 text-black">Use retina biometric verification for advanced security access</p>
+                                                        <a href="{{ url_for('biometrics.validate_retina') }}" class="btn btn-primary">
+                                                            <i class="bi bi-eye me-1"></i> Validate Retina
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                    
+                                    <div class="text-center mt-3">
+                                        <small class="text-dark">Complete at least two biometric verifications to activate the door opening animation</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center">
+                <a href="{{ url_for('biometrics.validate_biometrics') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i> Back to Biometric Validation
+                </a>
+                
+                {% if current_user.is_authenticated %}
+                <a href="{{ url_for('profile.dashboard') }}" class="btn btn-outline-primary">
+                    <i class="bi bi-speedometer2 me-1"></i> Go to Dashboard
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    /**
+     * Update the main vehicle image
+     */
+    function updateMainImage(imageUrl) {
+        const mainImage = document.querySelector('#mainVehicleImage img');
+        if (mainImage) {
+            mainImage.src = imageUrl;
+            
+            // Add a small animation
+            mainImage.style.transition = 'transform 0.3s ease-in-out';
+            mainImage.style.transform = 'scale(1.05)';
+            setTimeout(() => {
+                mainImage.style.transform = 'scale(1)';
+            }, 300);
+        }
+    }
+    
+    /**
+     * Update the biometric validation options based on current validation status
+     */
+    function updateBiometricOptions(sessionBiometrics) {
+        const container = document.getElementById('biometric-options-container');
+        if (!container) return;
+        
+        // Clear current options
+        container.innerHTML = '';
+        
+        // Check if we arrived here after face validation by checking URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const fromFaceValidation = urlParams.get('from') === 'face_validation';
+        
+        // Always force the face validation to be true when coming from face validation page
+        if (fromFaceValidation) {
+            console.log('Coming from face validation - updating session state and forcing face to be validated');
+            // Mark face as validated regardless of current state
+            sessionBiometrics.face = true;
+            
+            // Update localStorage to persist this change
+            const validatedBiometrics = JSON.parse(localStorage.getItem('validatedBiometrics') || '{"face":false,"voice":false,"retina":false,"proximity":false}');
+            validatedBiometrics.face = true;
+            
+            localStorage.setItem('validatedBiometrics', JSON.stringify(validatedBiometrics));
+            localStorage.setItem('sessionValidations', JSON.stringify(sessionBiometrics));
+            
+            // Also register this in the biometric animation system
+            if (window.biometricAnimation && typeof window.biometricAnimation.setBiometricValidated === 'function') {
+                window.biometricAnimation.setBiometricValidated('face', true);
+                window.biometricAnimation.setSessionValidation('face', true);
+                console.log('Registered face validation in biometric animation system');
+            }
+            
+            console.log('Updated biometrics state after face validation - face is now: ', sessionBiometrics.face);
+        }
+        
+        // Skip face validation option - if we got to the vehicle details page, 
+        // we already validated the face or have permission to see the details
+        
+        // Count how many validations we already have
+        const validationCount = Object.values(sessionBiometrics).filter(Boolean).length;
+        
+        // Show all options with validated ones disabled
+        console.log('Showing all options with validated ones disabled');
+        
+        // Show voice validation option (enabled if not validated)
+        if (!sessionBiometrics.voice) {
+            const voiceTemplate = document.getElementById('voice-validation-option');
+            if (voiceTemplate) {
+                container.innerHTML += voiceTemplate.innerHTML;
+            }
+        } else {
+            // Show validated voice option (disabled)
+            container.innerHTML += `
+                <div class="col-md-6">
+                    <div class="card h-100 bg-gradient border-0" style="background-color: rgba(25, 135, 84, 0.1); opacity: 0.7;">
+                        <div class="card-body d-flex align-items-center">
+                            <div class="me-3">
+                                <i class="bi bi-mic-fill fs-1 text-success"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-1 text-black">Voice Recognition</h5>
+                                <p class="mb-3 text-black">Voice authentication successful</p>
+                                <button class="btn btn-success" disabled>
+                                    <i class="bi bi-check-circle me-1"></i> Validated
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Show retina validation option (enabled if not validated)
+        if (!sessionBiometrics.retina) {
+            const retinaTemplate = document.getElementById('retina-validation-option');
+            if (retinaTemplate) {
+                container.innerHTML += retinaTemplate.innerHTML;
+            }
+        } else {
+            // Show validated retina option (disabled)
+            container.innerHTML += `
+                <div class="col-md-6">
+                    <div class="card h-100 bg-gradient border-0" style="background-color: rgba(13, 110, 253, 0.1); opacity: 0.7;">
+                        <div class="card-body d-flex align-items-center">
+                            <div class="me-3">
+                                <i class="bi bi-eye-fill fs-1 text-primary"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-1 text-black">Retina Scan</h5>
+                                <p class="mb-3 text-black">Retina verification successful</p>
+                                <button class="btn btn-primary" disabled>
+                                    <i class="bi bi-check-circle me-1"></i> Validated
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Show face validation option (enabled if not validated)
+        if (!sessionBiometrics.face) {
+            const faceTemplate = document.getElementById('face-validation-option');
+            if (faceTemplate) {
+                container.innerHTML += faceTemplate.innerHTML;
+            }
+        } else {
+            // Show validated face option (disabled)
+            container.innerHTML += `
+                <div class="col-md-6">
+                    <div class="card h-100 bg-gradient border-0" style="background-color: rgba(220, 53, 69, 0.1); opacity: 0.7;">
+                        <div class="card-body d-flex align-items-center">
+                            <div class="me-3">
+                                <i class="bi bi-person-badge-fill fs-1 text-danger"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-1 text-black">Facial Recognition</h5>
+                                <p class="mb-3 text-black">Face verification successful</p>
+                                <button class="btn btn-danger" disabled>
+                                    <i class="bi bi-check-circle me-1"></i> Validated
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // If no options are available (all validated), hide the container
+        if (container.innerHTML.trim() === '') {
+            container.innerHTML = `
+                <div class="col-12">
+                    <div class="alert alert-success">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-check-circle-fill me-3 fs-4"></i>
+                            <div>
+                                <h5 class="mb-1">All Biometrics Validated</h5>
+                                <p class="mb-0">You've completed all biometric validations. The car door animation should appear shortly.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    // Check biometric validation status
+    function checkBiometricStatus() {
+        // Get biometric validation status from localStorage
+        let validatedBiometrics = localStorage.getItem('validatedBiometrics');
+        let sessionValidations = localStorage.getItem('sessionValidations');
+        
+        // Default biometric states
+        let sessionBiometrics = { face: false, voice: false, retina: false, proximity: false };
+        
+        if (!validatedBiometrics) {
+            console.log('No biometric data found in localStorage');
+            updateBiometricOptions(sessionBiometrics);
+            return;
+        }
+        
+        try {
+            // Parse validated biometrics
+            validatedBiometrics = JSON.parse(validatedBiometrics);
+            console.log('Current validated biometrics:', validatedBiometrics);
+            
+            // Parse session validations (if any)
+            if (sessionValidations) {
+                try {
+                    sessionBiometrics = JSON.parse(sessionValidations);
+                    console.log('Session validations:', sessionBiometrics);
+                } catch (error) {
+                    console.error('Error parsing session validations:', error);
+                }
+            }
+            
+            // Update the biometric options based on session state
+            updateBiometricOptions(sessionBiometrics);
+            
+            // Count validations
+            const validCount = Object.values(validatedBiometrics).filter(Boolean).length;
+            const sessionCount = Object.values(sessionBiometrics).filter(Boolean).length;
+            
+            console.log(`Overall validated count: ${validCount}, Session count: ${sessionCount}`);
+            
+            // Clear any existing content in the prompt area
+            const biometricPromptArea = document.getElementById('biometric-prompt-area');
+            if (!biometricPromptArea) return;
+            
+            // Clear existing prompts
+            biometricPromptArea.innerHTML = '';
+            
+            // Case 1: Two or more biometrics validated in this session - show animation
+            if (sessionCount >= 2) {
+                console.log('Multiple biometrics validated in this session');
+                
+                // Show completion message
+                const completionTemplate = document.getElementById('validation-complete-template');
+                if (completionTemplate) {
+                    biometricPromptArea.innerHTML = completionTemplate.innerHTML;
+                }
+                
+                // Hide the vehicle access controls section since we've already validated
+                const vehicleAccessSection = document.getElementById('vehicle-access-section');
+                if (vehicleAccessSection) {
+                    vehicleAccessSection.style.display = 'none';
+                }
+                
+                // Show animation
+                if (window.biometricAnimation && typeof window.biometricAnimation.showCarDoorAnimation === 'function') {
+                    setTimeout(() => {
+                        console.log('Showing animation due to multiple validations in this session');
+                        window.biometricAnimation.showCarDoorAnimation();
+                    }, 500);
+                } else {
+                    console.warn('Animation function not available');
+                }
+            }
+            // Case 2: Voice validated but face not - suggest face validation
+            else if (validatedBiometrics.voice === true && validatedBiometrics.face !== true) {
+                console.log('Voice validated but face not, showing face prompt');
+                
+                const facePrompt = `
+                    <div class="alert alert-info">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-person-badge-fill me-3 fs-4 pulse-icon"></i>
+                            <div>
+                                <h5 class="mb-1">Perform one more biometric verification</h5>
+                                <p class="mb-2">Voice recognition successful! Complete face validation to unlock vehicle access.</p>
+                                <a href="{{ url_for('biometrics.validate_face') }}" class="btn btn-primary btn-pulse">
+                                    <i class="bi bi-camera me-1"></i> Validate Face
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                biometricPromptArea.innerHTML = facePrompt;
+            }
+            // Case 3: Voice validated but retina not - suggest retina validation
+            else if (validatedBiometrics.voice === true && validatedBiometrics.retina !== true) {
+                console.log('Voice validated but retina not, showing retina prompt');
+                
+                const retinaTemplate = document.getElementById('retina-validation-template');
+                if (retinaTemplate) {
+                    biometricPromptArea.innerHTML = retinaTemplate.innerHTML;
+                }
+            }
+            // Case 4: Face validated but voice not - suggest voice validation
+            else if (validatedBiometrics.face === true && validatedBiometrics.voice !== true) {
+                console.log('Face validated but voice not, showing voice prompt');
+                
+                const voiceTemplate = document.getElementById('voice-validation-template');
+                if (voiceTemplate) {
+                    biometricPromptArea.innerHTML = voiceTemplate.innerHTML;
+                }
+            }
+            // Case 5: Face validated but retina not - suggest retina validation
+            else if (validatedBiometrics.face === true && validatedBiometrics.retina !== true) {
+                console.log('Face validated but retina not, showing retina prompt');
+                
+                const retinaTemplate = document.getElementById('retina-validation-template');
+                if (retinaTemplate) {
+                    biometricPromptArea.innerHTML = retinaTemplate.innerHTML;
+                }
+            }
+            // Case 6: Two or more biometrics validated overall but not in this session
+            else if (validCount >= 2) {
+                console.log('Multiple biometrics validated but not in this session');
+                
+                // Add a reset prompt
+                biometricPromptArea.innerHTML = `
+                    <div class="alert alert-info">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-info-circle-fill me-3 fs-4"></i>
+                            <div>
+                                <h5 class="mb-1">Previously validated</h5>
+                                <p class="mb-2">You've already validated multiple biometrics. To see the car door animation, reset your session and validate again.</p>
+                                <button id="vehicle-reset-sessions-btn" class="btn btn-outline-danger">
+                                    <i class="bi bi-arrow-clockwise me-1"></i> Reset Session
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Add listener for the reset button
+                setTimeout(() => {
+                    const resetBtn = document.getElementById('vehicle-reset-sessions-btn');
+                    if (resetBtn) {
+                        resetBtn.addEventListener('click', function() {
+                            if (window.biometricAnimation && typeof window.biometricAnimation.resetSessionValidations === 'function') {
+                                window.biometricAnimation.resetSessionValidations();
+                                alert('Session validations have been reset. Validate biometrics again to see the car door animation.');
+                                location.reload(); // Refresh to update UI
+                            }
+                        });
+                    }
+                }, 100);
+            }
+        } catch (error) {
+            console.error('Error parsing biometric status:', error);
+        }
+    }
+    
+    // Add hover effect to gallery thumbnails
+    document.addEventListener('DOMContentLoaded', function() {
+        // Check biometric status when page loads
+        checkBiometricStatus();
+        
+        // Setup welcome animation for successful biometric validation
+        setupWelcomeAnimation();
+        
+        const thumbnails = document.querySelectorAll('.gallery-thumbnail');
+        thumbnails.forEach(thumbnail => {
+            thumbnail.addEventListener('mouseover', function() {
+                this.style.transform = 'scale(1.05)';
+                this.style.transition = 'transform 0.2s';
+                this.style.cursor = 'pointer';
+                this.style.boxShadow = '0 0 5px rgba(0,0,0,0.2)';
+            });
+            
+            thumbnail.addEventListener('mouseout', function() {
+                this.style.transform = 'scale(1)';
+                this.style.boxShadow = 'none';
+            });
+        });
+    });
+    
+    /**
+     * Setup welcome animation to trigger when biometrics are validated
+     */
+    function setupWelcomeAnimation() {
+        try {
+            // Check if welcome animation is available
+            if (!window.welcomeAnimation || typeof window.welcomeAnimation.show !== 'function') {
+                console.log('Welcome animation not available');
+                return;
+            }
+            
+            // Get current biometric status
+            const validatedStr = localStorage.getItem('validatedBiometrics');
+            const sessionStr = localStorage.getItem('sessionValidations');
+            
+            if (!validatedStr || !sessionStr) {
+                console.log('Biometric validation data not found');
+                return;
+            }
+            
+            const validatedBiometrics = JSON.parse(validatedStr);
+            const sessionValidations = JSON.parse(sessionStr);
+            
+            // Count how many validations we have in this session
+            let sessionCount = 0;
+            Object.values(sessionValidations).forEach(val => {
+                if (val === true) sessionCount++;
+            });
+            
+            // Check if biometrics belong to the same user
+            function doBiometricsMatchSameUser() {
+                const userIdsStr = localStorage.getItem('validatedUserIds');
+                if (!userIdsStr) return true; // Default to true if no data
+                
+                try {
+                    const userIds = JSON.parse(userIdsStr);
+                    // Get all user IDs from validations that have been done
+                    const activeUserIds = Object.entries(userIds)
+                        .filter(([type, userId]) => validatedBiometrics[type] && userId !== null)
+                        .map(([type, userId]) => userId);
+                    
+                    // If we have no validations or only one, no need to check matching
+                    if (activeUserIds.length <= 1) {
+                        return true;
+                    }
+                    
+                    // Check if all user IDs are the same
+                    const firstUserId = activeUserIds[0];
+                    const allMatch = activeUserIds.every(userId => userId === firstUserId);
+                    
+                    console.log(`User ID validation check: ${allMatch ? 'All biometrics match the same user' : 'Biometrics belong to different users!'}`);
+                    console.log(`User IDs from biometrics: ${JSON.stringify(activeUserIds)}`);
+                    
+                    return allMatch;
+                } catch (e) {
+                    console.error('Error checking user IDs:', e);
+                    return false; // Default to false on error
+                }
+            }
+            
+            // Check if we just completed a second biometric validation
+            const hasShownBiometricWelcome = sessionStorage.getItem('has_shown_biometric_welcome');
+            const biometricsMatch = doBiometricsMatchSameUser();
+            
+            if (sessionCount >= 2 && !hasShownBiometricWelcome && biometricsMatch) {
+                console.log('Multiple biometrics validated in this session, showing welcome animation');
+                
+                // Get user data from the page
+                const ownerName = "{{ vehicle.owner.first_name or vehicle.owner.username }}";
+                const vehicleModel = "{{ vehicle.make }} {{ vehicle.model }}";
+                
+                // Show the welcome animation with a small delay
+                setTimeout(function() {
+                    window.welcomeAnimation.show(ownerName, vehicleModel);
+                    
+                    // Set flag in session storage so it only shows once per session
+                    sessionStorage.setItem('has_shown_biometric_welcome', 'true');
+                }, 1500);
+            } else if (sessionCount >= 2 && !biometricsMatch) {
+                console.log('Multiple biometrics validated but they belong to different users - blocking welcome animation');
+                
+                // Show security alert
+                const container = document.querySelector('.container') || document.body;
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-danger alert-dismissible fade show mb-4';
+                alertDiv.role = 'alert';
+                alertDiv.innerHTML = `
+                    <strong>Security Alert!</strong> Biometric validations don't match the same user identity. Access denied.
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                `;
+                container.prepend(alertDiv);
+                
+                // Auto dismiss after 5 seconds
+                setTimeout(() => {
+                    try {
+                        const bsAlert = new bootstrap.Alert(alertDiv);
+                        bsAlert.close();
+                    } catch (e) {
+                        alertDiv.remove();
+                    }
+                }, 5000);
+            }
+        } catch (e) {
+            console.error('Error setting up welcome animation:', e);
+        }
+    }
+</script>
+{% endblock %}
